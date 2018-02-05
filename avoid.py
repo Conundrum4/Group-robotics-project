@@ -1,90 +1,77 @@
 #! /usr/bin/env python
-# RUNS SMOOTHLY.....or at least seems to.
+
 import rospy
 #import numpy as np
-from geometry_msgs.msg import Twist, Vector3
+from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
-
 def steering(msg):
-    
+    global vel
     #print len(msg.ranges)
     #np.isnan(msg.ranges[719])
     #print msg.ranges[719]
-    
-    left = msg.ranges[:180]	
+
+    left = msg.ranges[0:127]
     #print 'left' + left
-    front = msg.ranges[181:440]
+    front = msg.ranges[128: 392]
     #print 'front' + front
-    right = msg.ranges[441:]
+    right = msg.ranges[393:511]
     #print 'right' + right
-    
 
     #
     if min(left) < 0.3 and min(front) >= 0.5 :
         # If it's close to the wall, go forward
         # and keep closing to the wall
-        message = Twist(
-            Vector3(0.1, 0, 0),
-            Vector3(0, 0, 1.0)
-        )
-        
+        vel.linear.x = 0.1
+        vel.angular.z = 1
+        print "left"
     if min(right) < 0.3 and min(front) >= 0.5 :
         # If it's close to the wall, go forward
         # and keep closing to the wall
-        message = Twist(
-            Vector3(0.1, 0, 0),
-            Vector3(0, 0, -1.0)
-        )
-        
+        vel.linear.x = 0.1
+        vel.angular.z = -1
+        print "right"
     elif min(left) < 0.3 :
         # If the robot is very close to the wall,
         # only rotates to the other side
-        message = Twist(
-            Vector3(0, 0, 0),
-            Vector3(0, 0, -1)
-        )
-        
+        vel.linear.x = 0
+        vel.angular.z = 1
+        print "very left"
     elif min(right) < 0.3 :
         # If the robot is very close to the wall,
         # only rotates to the other side
-        message = Twist(
-            Vector3(0, 0, 0),
-            Vector3(0, 0, 1)
-        )
-        
+        vel.linear.x = 0
+        vel.angular.z = -1
+        print "very right"
     elif min(left) < 0.5 and min(front) < 0.5 :
         # If it's closing to the wall,
         # slows the velocity and rotate agressively
-        message = Twist(
-            Vector3(0.1, 0, 0),
-            Vector3(0, 0, 0.65)
-        )
-        
+        vel.linear.x = 0.1
+        vel.angular.z = 0.65
+        print "almost"
     elif min(right) < 0.5 and min(front) < 0.5 :
-        message = Twist(
-            Vector3(0.1, 0, 0),
-            Vector3(0, 0, -1)
-        )
-        
+        vel.linear.x = 0.1
+        vel.angular.z = -1
+        print "almost"
+    elif min(front) < 0.5 :
+        vel.linear.x = 0
+        vel.angular.z = 1
+        print "turn round"
     else :
         # Move forward
-        message = Twist(
-            Vector3(0.2,0,0),
-            Vector3(0,0,0)
-        )
-    
-    pub.publish(message)
-
+        vel.linear.x = 0.3
+        vel.angular.z = 0
+        print "go forth"
 #node
 rospy.init_node('avoid_stuff')
 
-#publishing 
+#publishing
 pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size = 1)
-
+vel = Twist()
 #subscribing
 sub = rospy.Subscriber('/scan', LaserScan, steering)
 
 #Block until shutdown
 r = rospy.Rate(10)
 while not rospy.is_shutdown():
+    pub.publish(vel)
     r.sleep()
