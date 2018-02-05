@@ -20,39 +20,39 @@ def steering(msg):
     
 
     #
-    if min(left) < 0.9 and min(front) >= 1.0 :
+    if min(left) < 0.3 and min(front) >= 0.5 :
         # If it's close to the wall, go forward
         # and keep closing to the wall
         message = Twist(
             Vector3(0.1, 0, 0),
-            Vector3(0, 0, 0.45)
+            Vector3(0, 0, 1.0)
         )
         
-    if min(right) < 0.9 and min(front) >= 1.0 :
+    if min(right) < 0.3 and min(front) >= 0.5 :
         # If it's close to the wall, go forward
         # and keep closing to the wall
         message = Twist(
             Vector3(0.1, 0, 0),
-            Vector3(0, 0, -0.45)
+            Vector3(0, 0, -1.0)
         )
         
-    elif min(left) < 0.5 :
+    elif min(left) < 0.3 :
         # If the robot is very close to the wall,
         # only rotates to the other side
         message = Twist(
             Vector3(0, 0, 0),
-            Vector3(0, 0, -0.25)
+            Vector3(0, 0, -1)
         )
         
-    elif min(right) < 0.5 :
+    elif min(right) < 0.3 :
         # If the robot is very close to the wall,
         # only rotates to the other side
         message = Twist(
             Vector3(0, 0, 0),
-            Vector3(0, 0, 0.25)
+            Vector3(0, 0, 1)
         )
         
-    elif min(left) < 2.0 and min(front) < 2.0 :
+    elif min(left) < 0.5 and min(front) < 0.5 :
         # If it's closing to the wall,
         # slows the velocity and rotate agressively
         message = Twist(
@@ -60,10 +60,10 @@ def steering(msg):
             Vector3(0, 0, 0.65)
         )
         
-    elif min(right) < 2.0 and min(front) < 2.0 :
+    elif min(right) < 0.5 and min(front) < 0.5 :
         message = Twist(
             Vector3(0.1, 0, 0),
-            Vector3(0, 0, -0.65)
+            Vector3(0, 0, -1)
         )
         
     else :
