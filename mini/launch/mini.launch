@@ -1,0 +1,5 @@
+<launch>
+  <!-- turtlebot_teleop_key already has its own built in velocity smoother -->
+  <node pkg="mini" type="avoid.py" name="avoid_stuff"  output="screen">
+  </node>
+</launch>
