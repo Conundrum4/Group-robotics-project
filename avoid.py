@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+# RUNS SMOOTHLY.....or at least seems to.
 import rospy
 #import numpy as np
 from geometry_msgs.msg import Twist, Vector3
