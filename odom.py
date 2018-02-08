@@ -23,8 +23,8 @@ def goal1(msg):
 def location_callback(msg):
 	#conversion from quaterion to euler
 	global q
-    q = ( msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w)
-    euler = tf.transformations.euler_from_quaternion(q)
+    	q = ( msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w)
+    	euler = tf.transformations.euler_from_quaternion(q)
 	yaw = euler[2]
 
 
