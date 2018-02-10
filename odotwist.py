@@ -51,7 +51,7 @@ while not rospy.is_shutdown():
 
     #angle_to_goal = angle_to_goal*(180/pi)
     #angle = angle_to_goal - th
-    print angle
+    #print angle
     if th < 90:
         speed.linear.x = 0.0
         speed.angular.z = 0.3
