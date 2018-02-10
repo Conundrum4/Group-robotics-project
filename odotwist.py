@@ -55,7 +55,7 @@ while not rospy.is_shutdown():
     if th < 90:
         speed.linear.x = 0.0
         speed.angular.z = 0.3
-    if th => 90:
+    if th >= 90:
         speed.linear.x = 0.5
         speed.angular.z = 0.0
     pub.publish(speed)
