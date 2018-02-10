@@ -29,7 +29,7 @@ rospy.init_node("speed_controller", anonymous = True)
 sub = rospy.Subscriber("odom", Odometry, newOdon)
 pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size =1)
 speed = Twist()
-opub = rospy.Publisher("odom", Odometry, queue_size =1)
+#opub = rospy.Publisher("odom", Odometry, queue_size =1)
 # set up the odometry reset publisher
 reset_odom = rospy.Publisher('/mobile_base/commands/reset_odometry', Empty, queue_size=10)
 
@@ -49,8 +49,8 @@ while not rospy.is_shutdown():
 
     angle_to_goal = atan2(inc_y, inc_x) #tanx = O/A
 
-    angle_to_goal = angle_to_goal*(180/pi)
-    angle = angle_to_goal - th
+    #angle_to_goal = angle_to_goal*(180/pi)
+    #angle = angle_to_goal - th
     print angle
     if th < 90:
         speed.linear.x = 0.0
