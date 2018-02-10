@@ -20,9 +20,9 @@ def newOdon(msg):
 
     x = msg.pose.pose.position.x
     y = msg.pose.pose.position.y
-    # rot_q = msg.pose.pose.orientation
-    # (roll, pitch, th) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
-    th = atan2(y,x)
+    rot_q = msg.pose.pose.orientation
+    (roll, pitch, th) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
+    #th = atan2(y,x)
     th = th*(180/pi)
     #print th
 rospy.init_node("speed_controller", anonymous = True)
@@ -41,7 +41,7 @@ r = rospy.Rate(5)
 turn = Odometry()
 goal = Point()
 goal.x = 5
-goal.y = 5
+goal.y = 6
 
 while not rospy.is_shutdown():
     inc_x = goal.x - x
@@ -52,10 +52,10 @@ while not rospy.is_shutdown():
     angle_to_goal = angle_to_goal*(180/pi)
     angle = angle_to_goal - th
     print angle
-    if angle > 10 or angle < -10:
+    if th < 90:
         speed.linear.x = 0.0
         speed.angular.z = 0.3
-    if -10<= angle <= 10:
+    if th => 90
         speed.linear.x = 0.5
         speed.angular.z = 0.0
     pub.publish(speed)
