@@ -18,13 +18,13 @@ def steering(data):
     global speed
     global turn
     #one = left eight = right
-    one = data.ranges[0:63]
-    two = data.ranges[64:127]
-    three = data.ranges[128:191]
-    four = data.ranges[192:319]
-    five = data.ranges[320:383]
-    six = data.ranges[384:447]
-    seven = data.ranges[385:511]
+    one = data.ranges[125:199]
+    two = data.ranges[299:200]
+    three = data.ranges[300:339]
+    four = data.ranges[340:380]
+    five = data.ranges[381:420]
+    six = data.ranges[421:520]
+    seven = data.ranges[521:595]
     maxdist = max(one) #save array with max distance
     turn = 0.15
     if maxdist < max(two):
@@ -108,4 +108,3 @@ while not rospy.is_shutdown():
     pub.publish(speed)
     r.sleep()
 rospy.spin()
-
