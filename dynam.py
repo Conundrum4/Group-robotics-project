@@ -23,9 +23,9 @@ sub_goal = Point()
 sub_goal.x = 0.0
 sub_goal.y = 0.0
 best_path = Point()
-def find_goal(goalx,goaly,x,y):
+def find_goal(goalx,goaly,xp,yp):
     #obtain the vector distance to goal
-    vect = sqrt(pow((goalx -x),2) + pow((goaly-y),2))
+    vect = sqrt(pow((goalx -xp),2) + pow((goaly-yp),2))
     print ("vect: %s" %(vect))
     return vect
 
@@ -69,7 +69,7 @@ def predict_point(angle):
     pred = Point()
     pred.x = x + 0.5*sin(angle)
     pred.y = y + 0.5*cos(angle)
-
+    return pred
 #Odometry callback
 def newOdon(msg):
 #use global variables
