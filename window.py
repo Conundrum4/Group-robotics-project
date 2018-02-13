@@ -45,6 +45,9 @@ def turn_options(sub_x, sub_y, index):
    if index == 7:
         sub_x = x + 0.13
         sub_y = y - 0.48
+        
+#set the ranges attributed to each option
+
 
 #BEGIN DWA(robotPose,robotGoal,robotModel)
 #   desiredV = calculateV(robotPose,robotGoal)
