@@ -49,7 +49,6 @@ def steering(data):
     end = d_to_a(k+45) #45 degree range makes half a metre range
     predict = Point()
     predict.x = predict.y = 0
-    best_path = Point()
     best_path = sub_goal
     for x in range(135):
         temp = (min(data.ranges[start:end]))
