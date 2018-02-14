@@ -52,12 +52,13 @@ def steering(data):
     best_path = sub_goal
     for x in range(135):
         temp = (min(data.ranges[start:end]))
+	dist = temp
         if temp >= 0.5 and temp >= dist:
             #check if the range has more space
             angle = k
             dist = temp
             predict = predict_point((k+45)/2) #half way between k and k+45
-            if(best_path.x == best_path.y ==0):
+            if(best_path.x == best_path.y == 0):
                 best_path = predict
             if(find_goal(goal.x,goal.y,predict.x,predict.y)<= find_goal(goal.x,goal.y,best_path.x,best_path.y)):
                 best_path = predict
@@ -127,7 +128,7 @@ while not rospy.is_shutdown():
         speed.angular.z = 0
 #check if the bot has reached the goal
     if -0.1 < inc_x < 0.1 and -0.1 < inc_y < 0.1:
-        if sub_goal.x == goal.x and sub_goal.y == goal.y:
+        if abs(sub_goal.x - goal.x)<= 0.1 and abs(sub_goal.y - goal.y)<=0.1:
             print  "met"
             r.sleep()
         else:
