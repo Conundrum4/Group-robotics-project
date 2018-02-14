@@ -84,11 +84,13 @@ def steering(data):
     arr = [one, two, three, four, five, six, seven]
     i = 0
     
+    #an array to store the distance from each potential sub_goal to the end goal
     closest = [0,0,0,0,0,0,0]
     
     for i in range(7)
       if check_ranges(min(arr[i]))==True:
-        closest[i] = find_goal
+        closest[i] = find_goal(turn_options(i).x, turn_options(i).y)
+          if  
 #BEGIN DWA(robotPose,robotGoal,robotModel)
 #   desiredV = calculateV(robotPose,robotGoal)
 #   laserscan = readScanner()
