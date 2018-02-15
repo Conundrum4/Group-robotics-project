@@ -12,7 +12,6 @@ from sensor_msgs.msg import LaserScan
 current_x = 0.0 #current x co-ord of robot
 current_y = 0.0 #current y co-ord of robot
 current_th = 0.0 #current orientation of the robot
-
 dist = 0.0
 turn = 0.0
 vel = 0.0
@@ -22,7 +21,7 @@ goal = Point()
 goal.x = 6
 goal.y = 0
 
-sub_goal = point()
+sub_goal = Point()
 sub_goal.x = 0
 sub_goal.y = 0
 
@@ -98,7 +97,7 @@ def steering(data):
     zero = data.ranges[0:112]
 
     #an array of the ranges
-    laser_ranges = [one, two, three, four, five, six, seven]
+    laser_ranges = [zero, one, two, three, four, five, six]
     i = 0
     j = 0
     k = 0
@@ -106,18 +105,18 @@ def steering(data):
     
     for i in range(7):
       new_coords.append(turn_options[i])                                              #adds the new co-ords to the array
-      closest.append(dist_to_goal(turn_options[i].x, dist_to_goal(turn_options[i].y)) #adds distance to goal
+      closest.append(dist_to_goal(turn_options[i].x, dist_to_goal(turn_options[i].y))) #adds distance to goal
         
-          if min(laser_ranges[i]) < 0.7:                                               #checks if there is an obstruction
-              no_obstruction.append(1)                                                #This is a viable option
-          else:
-               no_obstruction.append(0)                                               #There is an obstruction present
+      if min(laser_ranges[i]) < 0.7:                                               #checks if there is an obstruction
+          no_obstruction.append(1)                                                #This is a viable option
+      else:
+          no_obstruction.append(0)                                               #There is an obstruction present
     
-     for j in range(7):
-       if laser_ranges[i] == 1 and closest[i] == min(closest):                         #checks laser ranges and dist to goal
-           sub_goal = new_coords[i]                                                   #sets subgoal to co-ords with no obstructions...
-       else:                                                                           #...is closest to the goal
-           print 'nowhere to go!'
+    for j in range(7):
+      if laser_ranges[i] == 1 and closest[i] == min(closest):                         #checks laser ranges and dist to goal
+          sub_goal = new_coords[i]                                                   #sets subgoal to co-ords with no obstructions...
+      else:                                                                           #...is closest to the goal
+          print 'nowhere to go!'
          
                      
                      
@@ -157,8 +156,8 @@ r = rospy.Rate(0.5)
 while not rospy.is_shutdown():
 
 #obtain the x,y vector to goal
-    inc_x = goal.x - x
-    inc_y = goal.y - y
+    inc_x = goal.x - current_x
+    inc_y = goal.y - current_y
 
 #use tan to find the angle needed to turn towards the goal
     angle_to_goal = atan2(inc_y, inc_x) #tanx = O/A
@@ -167,7 +166,7 @@ while not rospy.is_shutdown():
     angle_to_goal = angle_to_goal*(180/pi)
 
 #find the difference between the angle of the bot and angle needed to turn
-    angle = angle_to_goal - th
+    angle = angle_to_goal - current_th
     print ("x: %s y: %s" % (inc_x, inc_y))
 
 #check if the bot is within a suitable angle to the goal
@@ -190,7 +189,7 @@ while not rospy.is_shutdown():
         print "nuh uh"
     pub.publish(speed)
     r.sleep()
-rospy.spin()                     
+rospy.spin()                          
                      
                      
                      
