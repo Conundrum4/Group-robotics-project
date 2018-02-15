@@ -67,6 +67,17 @@ def check_ranges(distance):
     if distance < 0.7:
         return False
     return True
+
+#Find the x and y co-ords of the goal
+def find_angle(goal_x,goal_y, x, y):
+    inc_x = goal.x - x
+    inc_y = goal.y - y
+    #use tan to find the angle needed to turn towards the goal
+    angle_to_goal = atan2(inc_y, inc_x) #tanx = O/A
+    #convert angle to degrees
+    angle_to_goal = angle_to_goal*(180/pi)
+    return angle_to_goal
+   
   
 #set the ranges attributed to each option
 def steering(data):
@@ -132,7 +143,53 @@ speed = Twist()
 reset_odom = rospy.Publisher('/mobile_base/commands/reset_odometry', Empty, queue_size=10)
 scan_sub = rospy.Subscriber('/scan', LaserScan, steering) 
                      
+# reset odometry values (these messages take a few iterations to get through)
+timer = time()
+while time() - timer < 0.25:
+    reset_odom.publish(Empty())
+r = rospy.Rate(0.5)
+
                      
+                     
+                     
+#Main method
+while not rospy.is_shutdown():
+
+#obtain the x,y vector to goal
+    inc_x = goal.x - x
+    inc_y = goal.y - y
+
+#use tan to find the angle needed to turn towards the goal
+    angle_to_goal = atan2(inc_y, inc_x) #tanx = O/A
+
+#convert angle to degrees
+    angle_to_goal = angle_to_goal*(180/pi)
+
+#find the difference between the angle of the bot and angle needed to turn
+    angle = angle_to_goal - th
+    print ("x: %s y: %s" % (inc_x, inc_y))
+
+#check if the bot is within a suitable angle to the goal
+    if angle > 1 or angle < -1:
+        speed.linear.x = 0.0
+        if(angle < -1):
+            speed.angular.z = -0.5
+        if angle > 1:
+            speed.angular.z = 0.5
+    if -1 <= angle <= 1:
+        print ("vel: %s turn: %s" %(vel,turn))
+        speed.linear.x = 0.3
+        speed.angular.z = 3*turn
+#check if the bot has reached the goal
+    if -0.1 < inc_x < 0.1 and -0.1 < inc_y < 0.1:
+	    speed.linear.x = 0
+	    speed.angular.z = 0
+    if dist < 0.2:
+        speed.linear.x = 0
+        print "nuh uh"
+    pub.publish(speed)
+    r.sleep()
+rospy.spin()                     
                      
                      
                      
