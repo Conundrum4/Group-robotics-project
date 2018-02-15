@@ -52,24 +52,23 @@ def steering(data):
     best_path = sub_goal
     for x in range(135):
         temp = (min(data.ranges[start:end]))
-	dist = temp
-        if temp >= 0.5 and temp >= dist:
-            #check if the range has more space
-            angle = k
+        if temp <= dist
             dist = temp
+        if temp >= 0.5:
+            #check if the range has more space
             predict = predict_point((k+45)/2) #half way between k and k+45
             if(best_path.x == best_path.y == 0):
                 best_path = predict
             if(find_goal(goal.x,goal.y,predict.x,predict.y)<= find_goal(goal.x,goal.y,best_path.x,best_path.y)):
                 best_path = predict
+                angle = (k+45)/2
         k = k+1
         start = d_to_a(k)
         end = d_to_a(k+45)
-
 def predict_point(angle):
     pred = Point()
-    pred.x = x + 0.5*sin(angle)
-    pred.y = y + 0.5*cos(angle)
+    pred.x = x + dist*0.5*cos(angle)
+    pred.y = y + dist*0.5*sin(angle)
     return pred
 #Odometry callback
 def newOdon(msg):
@@ -117,21 +116,22 @@ while not rospy.is_shutdown():
     angle = angle_to_goal - th
     print ("x: %s y: %s th: %s angletg:%s angle: %s" % (inc_x, inc_y,th,angle_to_goal, angle))
 #check if the bot is within a suitable angle to the goal
-    if angle > 2 or angle < -2:
+    if angle > 0.1 or angle < -0.1:
         speed.linear.x = 0.0
-        if(angle < -2):
+        if(angle < -0.1):
             speed.angular.z = -0.5
-        if angle > 2:
+        if angle > 0.1:
             speed.angular.z = 0.5
-    if -2 <= angle <= 2:
-        speed.linear.x = 0.1
+    if -0.1 <= angle <= 0.1:
+        speed.linear.x = 0.1*dist
         speed.angular.z = 0
 #check if the bot has reached the goal
-    if -0.1 < inc_x < 0.1 and -0.1 < inc_y < 0.1:
+    if abs(inc_x) <= 0.1 and abs(inc_y) <= 0.1:
         if abs(sub_goal.x - goal.x)<= 0.1 and abs(sub_goal.y - goal.y)<=0.1:
             print  "met"
             r.sleep()
         else:
+            print "sub_goal = %s,%s" %(best_path.x,best_path.y)
             sub_goal = best_path
     if -0.1 < inc_x < 0.1 and -0.1 < inc_y < 0.1:
 	    speed.linear.x = 0
