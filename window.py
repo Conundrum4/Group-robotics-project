@@ -30,25 +30,25 @@ def turn_options(index):
   turn = Point()
   x = 0
   y = 0
-   if index == 1:
+   if index == 0:
         x = current_x + 0.13
         y = current_y + 0.48
-   if index == 2:
+   if index == 1:
         x = current_x + 0.32
         y = current_y + 0.37
-   if index == 3:
+   if index == 2:
         x = current_x + 0.45
         y = current_y + 0.21
-   if index == 4:
+   if index == 3:
         x = current_x + 0.5
         y = current_y + 0
-   if index == 5:
+   if index == 4:
         x = current_x + 0.45
         y = current_y - 0.21
-   if index == 6:
+   if index == 5:
         x = current_x + 0.32
         y = current_y - 0.37
-   if index == 7:
+   if index == 6:
         x = current_x + 0.13
         y = current_y - 0.48
    
@@ -57,7 +57,7 @@ def turn_options(index):
    return turn
         
 #Obtain the shortest distance to the goal for a paticular set of co-ords
-def find_goal(x,y):
+def dist_to_goal(x,y):
     vect = sqrt(pow((goal.x -x),2) + pow((goal.y-y),2))
     #print ("Distance to goal: %s" %(vect))
     return vect
@@ -71,6 +71,11 @@ def check_ranges(distance):
 #set the ranges attributed to each option
 def steering(data):
     
+    laser_ranges = [] #an array to store the range values
+    new_coords = [] #an array to store potential new co-ords to move to
+    no_obstruction = [] #an array to store viable new co-ords (no obstruction present)
+    closest = [] #an array to store the distances of the new co-ords from the goal
+    
     #In gazebo left to right, on robot right to left
     six = data.ranges[608:719]
     five = data.ranges[509:608]
@@ -81,16 +86,30 @@ def steering(data):
     zero = data.ranges[0:112]
 
     #an array of the ranges
-    arr = [one, two, three, four, five, six, seven]
+    laser_ranges = [one, two, three, four, five, six, seven]
     i = 0
+    j = 0
+    k = 0
     
-    #an array to store the distance from each potential sub_goal to the end goal
-    closest = [0,0,0,0,0,0,0]
     
     for i in range(7)
-      if check_ranges(min(arr[i]))==True:
-        closest[i] = find_goal(turn_options(i).x, turn_options(i).y)
-          if  
+      new_coords.append(turn_options[i])                                              #adds the new co-ords to the array
+      closest.append(dist_to_goal(turn_options[i].x, dist_to_goal(turn_options[i].y)) #adds distance to goal
+        
+          if min(laser_ranges[i]) < 0.7                                               #checks if there is an obstruction
+              no_obstruction.append(1)                                                #This is a viable option
+          else
+               no_obstruction.append(0)                                               #There is an obstruction present
+    
+     for j in range(7)
+       if laser_ranges[i] == 1 and closest[i] == min(closest)
+           sub_goal = new_coords[i]
+       else
+           print 'nowhere to go!'
+         
+    
+      
+      
 #BEGIN DWA(robotPose,robotGoal,robotModel)
 #   desiredV = calculateV(robotPose,robotGoal)
 #   laserscan = readScanner()
