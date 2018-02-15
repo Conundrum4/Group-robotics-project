@@ -186,9 +186,7 @@ while not rospy.is_shutdown():
     if -0.1 <= inc_x <= 0.1 and -0.1 <= inc_y <= 0.1:
 	    speed.linear.x = 0
 	    speed.angular.z = 0
-    if dist < 0.2:
-        speed.linear.x = 0
-        print "nuh uh"
+   
     pub.publish(speed)
     r.sleep()
 rospy.spin()
