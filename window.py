@@ -191,8 +191,8 @@ while not rospy.is_shutdown():
     r.sleep()
 rospy.spin()
 
-
-
+# Use a boolean to check when subgoal has been reached???
+# Then when goal < 0.5 away, sub_goal = goal
 
 #BEGIN DWA(robotPose,robotGoal,robotModel)
 #   desiredV = calculateV(robotPose,robotGoal)
