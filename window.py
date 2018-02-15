@@ -104,19 +104,19 @@ def steering(data):
     k = 0
     
     
-    for i in range(7)
+    for i in range(7):
       new_coords.append(turn_options[i])                                              #adds the new co-ords to the array
       closest.append(dist_to_goal(turn_options[i].x, dist_to_goal(turn_options[i].y)) #adds distance to goal
         
-          if min(laser_ranges[i]) < 0.7                                               #checks if there is an obstruction
+          if min(laser_ranges[i]) < 0.7:                                               #checks if there is an obstruction
               no_obstruction.append(1)                                                #This is a viable option
-          else
+          else:
                no_obstruction.append(0)                                               #There is an obstruction present
     
-     for j in range(7)
-       if laser_ranges[i] == 1 and closest[i] == min(closest)                         #checks laser ranges and dist to goal
+     for j in range(7):
+       if laser_ranges[i] == 1 and closest[i] == min(closest):                         #checks laser ranges and dist to goal
            sub_goal = new_coords[i]                                                   #sets subgoal to co-ords with no obstructions...
-       else                                                                           #...is closest to the goal
+       else:                                                                           #...is closest to the goal
            print 'nowhere to go!'
          
                      
