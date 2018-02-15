@@ -88,19 +88,18 @@ def steering(data):
     closest = [] #an array to store the distances of the new co-ords from the goal
     
     #In gazebo left to right, on robot right to left
-    six = data.ranges[608:719]
-    five = data.ranges[509:608]
-    four = data.ranges[409:508]
-    three = data.ranges[313:408]
-    two = data.ranges[213:312]
-    one = data.ranges[113:212]
-    zero = data.ranges[0:112]
+    zero = data.ranges[431:511] 
+    one = data.ranges[361:430] 
+    two = data.ranges[291:360] 
+    three = data.ranges[224:290] 
+    four = data.ranges[154:223] 
+    five = data.ranges[83:153] 
+    six = data.ranges[0:82]
 
     #an array of the ranges
     laser_ranges = [zero, one, two, three, four, five, six]
     i = 0
     j = 0
-    k = 0
     
     
     for i in range(7):
