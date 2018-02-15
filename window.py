@@ -31,31 +31,31 @@ def turn_options(index):
   turn = Point()
   x = 0
   y = 0
-   if index == 0:
+  if index == 0:
         x = current_x + 0.13
         y = current_y + 0.48
-   if index == 1:
+  if index == 1:
         x = current_x + 0.32
         y = current_y + 0.37
-   if index == 2:
+  if index == 2:
         x = current_x + 0.45
         y = current_y + 0.21
-   if index == 3:
+  if index == 3:
         x = current_x + 0.5
         y = current_y + 0
-   if index == 4:
+  if index == 4:
         x = current_x + 0.45
         y = current_y - 0.21
-   if index == 5:
+  if index == 5:
         x = current_x + 0.32
         y = current_y - 0.37
-   if index == 6:
+  if index == 6:
         x = current_x + 0.13
         y = current_y - 0.48
    
-   turn.x = x
-   turn.y = y
-   return turn
+  turn.x = x
+  turn.y = y
+  return turn
         
 #Obtain the shortest distance to the goal for a paticular set of co-ords
 def dist_to_goal(x,y):
