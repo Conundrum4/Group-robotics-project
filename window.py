@@ -9,19 +9,20 @@ from std_msgs.msg import Empty
 from time import time
 from sensor_msgs.msg import LaserScan
 #initialize values
-global current_x = 0.0 #current x co-ord of robot
-global current_y = 0.0 #current y co-ord of robot
-global current_th = 0.0 #current orientation of the robot
+current_x = 0.0 #current x co-ord of robot
+current_y = 0.0 #current y co-ord of robot
+current_th = 0.0 #current orientation of the robot
+
 dist = 0.0
 turn = 0.0
 vel = 0.0
 
 #Set the goal coordinates
-global goal = Point()
+goal = Point()
 goal.x = 6
 goal.y = 0
 
-global sub_goal = point()
+sub_goal = point()
 sub_goal.x = 0
 sub_goal.y = 0
 
