@@ -100,7 +100,6 @@ def steering(data):
     laser_ranges = [zero, one, two, three, four, five, six]
     i = 0
     j = 0
-    k = 0
     
     
     for i in range(7):
