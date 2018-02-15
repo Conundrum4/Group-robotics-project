@@ -102,14 +102,41 @@ def steering(data):
                no_obstruction.append(0)                                               #There is an obstruction present
     
      for j in range(7)
-       if laser_ranges[i] == 1 and closest[i] == min(closest)
-           sub_goal = new_coords[i]
-       else
+       if laser_ranges[i] == 1 and closest[i] == min(closest)                         #checks laser ranges and dist to goal
+           sub_goal = new_coords[i]                                                   #sets subgoal to co-ords with no obstructions...
+       else                                                                           #...is closest to the goal
            print 'nowhere to go!'
          
+                     
+                     
+#Odometry callback
+def newOdom(msg):
     
-      
-      
+    current_x = msg.pose.pose.position.x     #set global variable
+    current_y = msg.pose.pose.position.y     #set global variable
+                     
+    orient = msg.pose.pose.orientation       #local variable
+    th = 0.0
+    (roll, pitch, th) = euler_from_quaternion([orient.x, orient.y, orient.z, orient.w])
+    
+    current_th = th *(180/pi)                 #set global variable and convert from radians to degrees
+     
+#set up nodes
+rospy.init_node("speed_controller", anonymous = True)
+sub = rospy.Subscriber("/odom", Odometry, newOdom)
+pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size =1)
+speed = Twist()
+
+#opub = rospy.Publisher("odom", Odometry, queue_size =1)
+# set up the odometry reset publisher
+reset_odom = rospy.Publisher('/mobile_base/commands/reset_odometry', Empty, queue_size=10)
+scan_sub = rospy.Subscriber('/scan', LaserScan, steering) 
+                     
+                     
+                     
+                     
+                     
+                     
 #BEGIN DWA(robotPose,robotGoal,robotModel)
 #   desiredV = calculateV(robotPose,robotGoal)
 #   laserscan = readScanner()
