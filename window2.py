@@ -15,7 +15,7 @@ current_th = 0.0 #current orientation of the robot
 dist = 0.0
 turn = 0.0
 vel = 0.0
-
+achieved = True
 #Set the goal coordinates
 goal = Point()
 goal.x = 6
@@ -105,7 +105,8 @@ def steering(data):
     i = 0
     j = 0
 
-
+    if(achieved == False)
+	return
     for i in range(7):
       new_coords.append(turn_options(i))                                              #adds the new co-ords to the array
       closest.append(dist_to_goal(turn_options(i).x, turn_options(i).y)) #adds distance to goal
@@ -121,6 +122,7 @@ def steering(data):
       if (no_obstruction[j] == 1) and (closest[j] == min(closest)):
           print j                       #checks laser ranges and dist to goal
           sub_goal = new_coords[j]                                                   #sets subgoal to co-ords with no obstructions...
+	  achieved = False
       else:                                                                           #...is closest to the goal
           print 'nowhere to go!'
 
@@ -184,9 +186,10 @@ while not rospy.is_shutdown():
         speed.angular.z = 0.0
 #check if the bot has reached the goal
     if -0.1 <= inc_x <= 0.1 and -0.1 <= inc_y <= 0.1:
-	    speed.linear.x = 0
-	    speed.angular.z = 0
-   
+	speed.linear.x = 0
+	speed.angular.z = 0
+    if -0.1 <= inc_x <= 0.1 and -0.1 <= inc_y <= 0.1:
+	achieved = True
     pub.publish(speed)
     r.sleep()
 rospy.spin()
