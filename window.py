@@ -192,7 +192,10 @@ while not rospy.is_shutdown():
 rospy.spin()
 
 # Use a boolean to check when subgoal has been reached???
-# Then when goal < 0.5 away, sub_goal = goal
+# Then when goal < 0.5 away, sub_goal = goal??
+# Set a static speed and only adjust direction??
+# Use a bearing instead of +ve and -ve angles??
+
 
 #BEGIN DWA(robotPose,robotGoal,robotModel)
 #   desiredV = calculateV(robotPose,robotGoal)
