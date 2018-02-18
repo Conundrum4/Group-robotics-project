@@ -204,7 +204,11 @@ while not rospy.is_shutdown():
 	    speed.angular.z = 0
             print 'I am here!'
             achieved = True
-            r.sleep()
+    if -0.25<= (goal.x-current_x) <= 0.25 and -0.25 <= (goal.y-current_y)<=0.25:
+	    speed.linear.x = 0
+	    speed.angular.z = 0
+	    while(0<1):
+		print ""
     pub.publish(speed)
     r.sleep()
 rospy.spin()
