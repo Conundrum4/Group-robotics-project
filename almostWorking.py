@@ -145,22 +145,20 @@ def newOdom(msg):
     global current_th
     current_x = msg.pose.pose.position.x     #set global variable
     current_y = msg.pose.pose.position.y     #set global variable
-    roll = pitch = th = 0.0
+    roll = pitch = current_th = 0.0
 
-
-    orient = msg.pose.pose.orientation       #local variable
-   
-    (roll, pitch, th) = euler_from_quaternion([orient.x, orient.y, orient.z, orient.w])
-
-    current_th = th*(180/pi)                 #set global variable and convert from radians to degrees
-    print current_th
+    rot_q = msg.pose.pose.orientation
+#obtain the angle 'yaw' using a quaternion to euler converter
+    (roll, pitch, current_th) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
+#convert the angle to degrees
+    #th = atan2(y,x)
+    current_th = current_th*(180/pi)
 #set up nodes
 rospy.init_node("speed_controller", anonymous = True)
 sub = rospy.Subscriber("/odom", Odometry, newOdom)
 pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size =1)
 speed = Twist()
 
-#opub = rospy.Publisher("odom", Odometry, queue_size =1)
 # set up the odometry reset publisher
 reset_odom = rospy.Publisher('/mobile_base/commands/reset_odometry', Empty, queue_size=10)
 scan_sub = rospy.Subscriber('/scan', LaserScan, steering)
