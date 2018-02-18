@@ -31,6 +31,7 @@ sub_goal.y = 0
 def turn_options(index):
   global current_x
   global current_y
+  global turn 
   turn = Point()
   x = 0
   y = 0
@@ -109,7 +110,7 @@ def steering(data):
     j = 0
 
     if(achieved == False):
-            print 'I am not there yet!'
+            #print 'I am not there yet!'
 	    return
 
     if(resetted == False):
@@ -122,8 +123,9 @@ def steering(data):
             no_obstruction[i] = 1                                            #This is a viable option
         else:
             no_obstruction[i]= 0
-            closest[i] = 20*closest[i]                                        #*20 to make sure that obstructed co-ords are not seen as closest
-	print no_obstruction
+            closest[i] = 20*closest[i]
+            print no_obstruction                                        #*20 to make sure that obstructed co-ords are not seen as closest
+	    print closest
                                                                                 #There is an obstruction present
 
     for j in range(7):
@@ -169,7 +171,7 @@ timer = time()
 while time() - timer < 1.5:
     reset_odom.publish(Empty())
 resetted = True
-r = rospy.Rate(15)
+r = rospy.Rate(10)
 
 #Main method
 while not rospy.is_shutdown():
@@ -186,15 +188,16 @@ while not rospy.is_shutdown():
 #find the difference between the angle of the bot and angle needed to turn
     angle = angle_to_goal - current_th
     print ("x: %s y: %s th: %s" % (current_x, current_y, current_th))
-    print angle
+    
 #check if the bot is within a suitable angle to the goal
 #4.5 degree error is a comprimise between speed and accuracy
     if angle > 4.5 or angle < -4.5:
+        print angle
         speed.linear.x = 0.0
         if(angle < -4.5):
-            speed.angular.z = -0.3
-        if angle > 4.5:
-            speed.angular.z = 0.3
+            speed.angular.z = -0.15
+        if angle >= 4.5:
+            speed.angular.z = 0.15
     elif -4.5 <= angle <= 4.5:
         speed.linear.x = 0.3
         speed.angular.z = 0.0
@@ -204,34 +207,7 @@ while not rospy.is_shutdown():
 	    speed.angular.z = 0
             print 'I am here!'
             achieved = True
-    if -0.25<= (goal.x-current_x) <= 0.25 and -0.25 <= (goal.y-current_y)<=0.25:
-	    speed.linear.x = 0
-	    speed.angular.z = 0
-	    while(0<1):
-		print ""
+    
     pub.publish(speed)
     r.sleep()
 rospy.spin()
-
-# Use a boolean to check when subgoal has been reached???
-# Then when goal < 0.5 away, sub_goal = goal
-
-#BEGIN DWA(robotPose,robotGoal,robotModel)
-#   desiredV = calculateV(robotPose,robotGoal)
-#   laserscan = readScanner()
-#   allowable_v = generateWindow(robotV, robotModel)
-#   allowable_w  = generateWindow(robotW, robotModel)
-#   for each v in allowable_v
-#      for each w in allowable_w
-#      dist = find_dist(v,w,laserscan,robotModel)
-#      breakDist = calculateBreakingDistance(v)
-#      if (dist > breakDist)  //can stop in time
-#         heading = hDiff(robotPose,goalPose, v,w)
-#         clearance = (dist-breakDist)/(dmax - breakDist)
-#         cost = costFunction(heading,clearance, abs(desired_v - v))
-#         if (cost > optimal)
-#            best_v = v
-#            best_w = w
-#            optimal = cost
-#    set robot trajectory to best_v, best_w
-#END
