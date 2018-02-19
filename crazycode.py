@@ -8,7 +8,6 @@ from math import atan2, pi, pow, sqrt, sin, cos
 from std_msgs.msg import Empty
 from time import time
 from sensor_msgs.msg import LaserScan
-import numpy as np
 
 #initialize values
 current_x = 0.0                                                                 # current x co-ord of robot
@@ -22,7 +21,7 @@ resetted = False                                                                
 
 #Set the goal coordinates
 goal = Point()                                                                  # co-ordinates of the final goal
-goal.x = 6
+goal.x = 5
 goal.y = 0
 
 sub_goal = Point()                                                              # a subgoal 0.5 meters from the robot
@@ -31,18 +30,18 @@ sub_goal.y = 0
 
 #set the vector increments for a 0.5m radius
 def turn_options(index):                                                        # This function holds 7 possible turning options (windows)
-    global current_x                                                            # which will be added to the current co-ordinates to determine
-    global current_y
-    global current_th
-    th = 0                                                            # the location of the next subgoal 0 -> 7 , left -> right
+    global current_x                                                            # which will be added to the current co-ordinates to d
+    global current_y                                                            # the location of the next subgoal 0 -> 7 , left -> right
+    th = 0.0
     global turn
+    global current_th
     turn = Point()
     x = 0
     y = 0
 
     # 75 degrees left
     if index == 0:
-        th = 75
+       th = 90
     # 50 degrees left
     if index == 1:
         th = 50
@@ -62,8 +61,8 @@ def turn_options(index):                                                        
     if index == 6:
         th = -90
 
-    turn.x = current_x + 0.5*sin(th)
-    turn.y = current_y + 0.5*cos(th)
+    turn.x = current_x + 0.5*cos(th+current_th)
+    turn.y = current_y + 0.5*sin(th+current_th)
     return turn
 
 #Obtain the shortest distance to the goal for a paticular set of co-ords
@@ -100,11 +99,6 @@ def steering(data):
     no_obstruction = [None]*7                                                   #an array to store viable new co-ords (no obstruction present)
     closest = [None]*7                                                          #an array to store the distances of the new co-ords from the goal
 
-    #data = np.asarray(data)
-    #data = np.nan_to_num(data)
-    #data = n.where(data == 0, data + 10, data)
-
-
     #In gazebo left to right(0 -> 6), on robot right to left (6 <- 0)
     six = data.ranges[608:719]
     five = data.ranges[509:608]
@@ -131,14 +125,14 @@ def steering(data):
         new_coords[i] = turn_options(i)                                         # Adds the new co-ords to the array
         closest[i] = dist_to_goal(turn_options(i).x, turn_options(i).y)         # Adds distance to goal
 
-        if min(laser_ranges[i]) > 0.7:                                          # Checks if there is an obstruction
+        if min(laser_ranges[i]) >= 0.7:                                          # Checks if there is an obstruction
             no_obstruction[i] = 1                                               # This is a viable option
         else:
             no_obstruction[i]= 0                                                # There is an obstruction, not a viable option
             closest[i] = 20*closest[i]                                          # *20 to make sure that obstructed co-ords are not seen as closest
             print no_obstruction
 	    print closest
-                                                                                # There is an obstruction present
+            print min(laser_ranges[i])                                                                   # There is an obstruction present
 
     for j in range(7):
         if (no_obstruction[j] == 1) and (closest[j] == min(closest)):           # Checks laser ranges and dist to goal
@@ -149,7 +143,7 @@ def steering(data):
             achieved = False                                                    # Updates the achieved boolean
         else:
             print 'nowhere to go!'
-        print new_coords
+
 
 #Odometry callback
 def newOdom(msg):
@@ -199,11 +193,10 @@ while not rospy.is_shutdown():
 
 #find the difference between the angle of the bot and angle needed to turn
     angle = angle_to_goal - current_th
-    #print ("x: %s y: %s th: %s" % (current_x, current_y, current_th))
+    print ("x: %s y: %s th: %s" % (current_x, current_y, current_th))
 
 # 4.5 degree error is a comprimise between speed and accuracy
     if angle > 4.5 or angle < -4.5:
-        print 'angle'
         print angle
         speed.linear.x = 0.0
         if(angle < -4.5):
