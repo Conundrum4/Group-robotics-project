@@ -95,10 +95,11 @@ def find_angle(goal_x,goal_y, x, y):
 def steering(data):
     global sub_goal
     global achieved
-    laser_ranges = [None]*7                                                           #an array to store the range values
-    new_coords = [None]*7                                                             #an array to store potential new co-ords to move to
-    no_obstruction = [None]*7                                                         #an array to store viable new co-ords (no obstruction present)
-    closest = [None]*7                                                               #an array to store the distances of the new co-ords from the goal
+    #1000 is dummy value so that a value is not considered
+    laser_ranges = [1000]*7                                                           #an array to store the range values
+    new_coords = [1000]*7                                                             #an array to store potential new co-ords to move to
+    no_obstruction = [1000]*7                                                         #an array to store viable new co-ords (no obstruction present)
+    closest = [1000]*7                                                               #an array to store the distances of the new co-ords from the goal
 
     #In gazebo left to right(0 -> 6), on robot right to left (6 <- 0)
     six = data.ranges[608:719]
@@ -194,8 +195,7 @@ while not rospy.is_shutdown():
     angle_to_goal = angle_to_goal*(180/pi)
 
 #find the difference between the angle of the bot and angle needed to turn
-    angle = angle_to_goal - current_th
-   
+    angle = (angle_to_goal-current_th)%360
 
     print ("x: %s y: %s th: %s" % (current_x, current_y, current_th))
     
