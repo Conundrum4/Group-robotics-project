@@ -20,8 +20,8 @@ achieved = True
 resetted = False
 #Set the goal coordinates
 goal = Point()
-goal.x = 6
-goal.y = 2
+goal.x = -6
+goal.y = -2
 
 sub_goal = Point()
 sub_goal.x = 0
@@ -36,8 +36,8 @@ def turn_options(index):
   x = 0
   y = 0
   if index == 0:
-        x = current_x + 0.13
-        y = current_y + 0.48
+        x = current_x + 0.0
+        y = current_y + 0.5
   if index == 1:
         x = current_x + 0.32
         y = current_y + 0.37
@@ -46,7 +46,7 @@ def turn_options(index):
         y = current_y + 0.21
   if index == 3:
         x = current_x + 0.5
-        y = current_y + 0
+        y = current_y + 0.0
   if index == 4:
         x = current_x + 0.45
         y = current_y - 0.21
@@ -54,9 +54,26 @@ def turn_options(index):
         x = current_x + 0.32
         y = current_y - 0.37
   if index == 6:
-        x = current_x + 0.13
-        y = current_y - 0.48
-
+        x = current_x + 0.0
+        y = current_y - 0.5
+  if index == 7:
+        x = current_x - 0.32
+        y = current_y - 0.37
+  if index == 8:
+        x = current_x - 0.45
+        y = current_y - 0.21
+  if index == 9:
+        x = current_x - 0.5
+        y = current_y + 0.0
+  if index == 10:
+        x = current_x - 0.45
+        y = current_y + 0.21
+  if index == 11:
+        x = current_x - 0.32
+        y = current_y + 0.37
+  if index == 12:
+        x = current_x + 0.0
+        y = current_y + 0.5
   turn.x = x
   turn.y = y
   return turn
@@ -70,7 +87,7 @@ def dist_to_goal(x,y):
 
 #Is there an obstacle within 0.7m of the robot on a chosen path?  If yes, eliminate that path as an option
 def check_ranges(distance):
-    if distance < 0.7:
+    if distance < 1.2:
         return False
     return True
 
@@ -119,7 +136,7 @@ def steering(data):
         new_coords[i] = turn_options(i)                                        #adds the new co-ords to the array
         closest[i] = dist_to_goal(turn_options(i).x, turn_options(i).y)        #adds distance to goal
 
-        if min(laser_ranges[i]) > 0.7:                                          #checks if there is an obstruction
+        if min(laser_ranges[i]) > 1.2:                                          #checks if there is an obstruction
             no_obstruction[i] = 1                                            #This is a viable option
         else:
             no_obstruction[i]= 0
@@ -187,6 +204,8 @@ while not rospy.is_shutdown():
 
 #find the difference between the angle of the bot and angle needed to turn
     angle = angle_to_goal - current_th
+   
+
     print ("x: %s y: %s th: %s" % (current_x, current_y, current_th))
     
 #check if the bot is within a suitable angle to the goal
