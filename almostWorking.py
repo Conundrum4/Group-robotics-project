@@ -4,7 +4,7 @@ import rospy
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point, Twist
-from math import atan2, pi, pow, sqrt
+from math import atan2, pi, pow, sqrt, cos, sin
 from std_msgs.msg import Empty
 from time import time
 from sensor_msgs.msg import LaserScan
@@ -33,49 +33,37 @@ def turn_options(index):
   global current_y
   global turn 
   turn = Point()
+  angle = 0
   x = 0
   y = 0
   if index == 0:
-        x = current_x + 0.0
-        y = current_y + 0.5
+        angle = 90
   if index == 1:
-        x = current_x + 0.32
-        y = current_y + 0.37
+        angle = 60
   if index == 2:
-        x = current_x + 0.45
-        y = current_y + 0.21
+       angle = 30
   if index == 3:
-        x = current_x + 0.5
-        y = current_y + 0.0
+        angle = 0
   if index == 4:
-        x = current_x + 0.45
-        y = current_y - 0.21
+       angle = -30
   if index == 5:
-        x = current_x + 0.32
-        y = current_y - 0.37
+       angle = -60
   if index == 6:
-        x = current_x + 0.0
-        y = current_y - 0.5
+        angle = -90
   if index == 7:
-        x = current_x - 0.32
-        y = current_y - 0.37
+        angle = -120
   if index == 8:
-        x = current_x - 0.45
-        y = current_y - 0.21
+        angle = -150
   if index == 9:
-        x = current_x - 0.5
-        y = current_y + 0.0
+        angle = 180
   if index == 10:
-        x = current_x - 0.45
-        y = current_y + 0.21
+       angle = 150
   if index == 11:
-        x = current_x - 0.32
-        y = current_y + 0.37
+	angle = 120
   if index == 12:
-        x = current_x + 0.0
-        y = current_y + 0.5
-  turn.x = x
-  turn.y = y
+       angle = 90
+  turn.x = x + 0.5*cos(angle)
+  turn.y = y + 0.5*sin(angle)
   return turn
 
 #Obtain the shortest distance to the goal for a paticular set of co-ords
@@ -133,7 +121,10 @@ def steering(data):
     if(resetted == False):
 	    return
     for i in range(7):
-        new_coords[i] = turn_options(i)                                        #adds the new co-ords to the array
+	if(goal.x < 0):
+		new_coords[i] = turn_options(i+6)
+	else:
+		new_coords[i] = turn_options(i)                                        #adds the new co-ords to the array
         closest[i] = dist_to_goal(turn_options(i).x, turn_options(i).y)        #adds distance to goal
 
         if min(laser_ranges[i]) > 1.2:                                          #checks if there is an obstruction
