@@ -96,7 +96,7 @@ goal = Point()
 goal.x = -2
 goal.y = 2
 delta = Point()
-def a_to_d(range):
+def a_to_d(a):
     return (a/511)*180 -90
 def steering(data):
     Fa = Attractive(goal.x,goal.y,current_x,current_y,3,2) #Attractive force
