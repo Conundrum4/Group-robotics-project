@@ -199,3 +199,28 @@ while not rospy.is_shutdown():
         pub.publish(speed)
     	r.sleep()
 rospy.spin()
+
+    #GAZEBO 720 left to right
+#nine = data.ranges[648:719]
+#eight = data.ranges[576:647]
+#seven = data.ranges[504:575]
+#six = data.ranges[432:503]
+#five = data.ranges[360:431]
+#four = data.ranges[288:359]
+#three = data.ranges[216:287]
+#two = data.ranges[144:215]
+#one = data.ranges[72:143]
+#zero = data.ranges[0:71]
+
+    #ROBOT 512 right to left
+#zero = data.ranges[460:511]
+#one = data.ranges[407:459]
+#two = data.ranges[358:408]
+#three = data.ranges[307:357]
+#four = data.ranges[256:306]
+#five = data.ranges[205:255]
+#six = data.ranges[154:204]
+#seven = data.ranges[103:153]
+#eight = data.ranges[52:102]
+#nine = data.ranges[0:51]
+
