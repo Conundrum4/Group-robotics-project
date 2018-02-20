@@ -107,14 +107,14 @@ def steering(data):
     i = 0
     j = round(total_ranges,1)
     for i in range (10):
-    start = i*j
-    end = (i+1)*j-1
-    arr[i] = data.ranges[start:end]
-    temp.x = current_x + min(arr[i])*cos(a_to_d((start+end)/2))
-    temp.y = current_y + min(arr[i])*sin(a_to_d((start+end)/2))
-    Fr[i] = Repulsive(temp.x,temp.y,current_x,current_y,0.2,0.3)
-    print Fr[i].Xo
-
+        start = i*j
+        end = (i+1)*j-1
+        arr[i] = data.ranges[start:end]
+        temp.x = current_x + min(arr[i])*cos(a_to_d((start+end)/2))
+        temp.y = current_y + min(arr[i])*sin(a_to_d((start+end)/2))
+        Fr[i] = Repulsive(temp.x,temp.y,current_x,current_y,0.2,0.3)
+        print Fr[i].Xo
+    
     for i in range(10):
         delta += Fr[i].check_dist_goal()
     delta += Fa.check_dist_goal()
