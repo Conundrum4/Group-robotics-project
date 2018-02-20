@@ -34,7 +34,7 @@ class Attractive:
 		return
 
     def check_dist_goal():
-        delta Point()
+        delta = Point()
         #goal statement
         if dg < Rg:
             delta.x = delta.y = 0
@@ -99,10 +99,10 @@ delta = Point()
 def a_to_d(a):
     return (a/512)*180 -90
 def steering(data):
-    Fa = Attractive(goal.x,goal.y,current_x,current_y,3,2) #Attractive force
+    Fa = Attractive(goal.x,goal.y,current_x,current_y,.2,.3) #Attractive force
 	#PUT DATA HERE
     temp = Point()
-	total_ranges = 512/10
+    total_ranges = 512/10
     start = end = 0
     for i in range (10)
     j = round(total_ranges,1)
@@ -112,7 +112,7 @@ def steering(data):
     temp.x = current_x + min(arr[i])*cos(a_to_d((start+end)/2))
     temp.y = current_y + min(arr[i])*sin(a_to_d((start+end)/2))
     Fr[i] = Repulsive(temp.x,temp.y,current_x,current_y,0.2,0.3)
-	print Fr[i].Xo
+    print Fr[i].Xo
 
     for i in range(10):
         delta += Fr[i].check_dist_goal()
@@ -135,7 +135,7 @@ def Odom(msg):
 
 #set up nodes
 rospy.init_node("speed_controller", anonymous = True)                           # Node
-sub = rospy.Subscriber("/odom", Odometry, Odom)                              # Odometry subscriber
+sub = rospy.Subscriber('/odom', Odometry, Odom)                              # Odometry subscriber
 pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size =1)        # Publisher to move robot
 speed = Twist()
 
