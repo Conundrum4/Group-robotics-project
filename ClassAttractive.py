@@ -9,9 +9,10 @@ from sensor_msgs.msg import LaserScan
 import numpy as np
 
 class Attractive:
-        alpha = 0.1
-        dg = 0
-        thg = 0
+    alpha = 0.1
+    dg = 0
+    thg = 0
+
 	def __init__(self,Xg,Yg,Xc,Yc,Rg,Sg):
 		self.Xg = Xg
 		self.Yg = Yg
@@ -26,7 +27,7 @@ class Attractive:
 
 	def angle_to_goal(self):
 		thg =  atan2(Yg-Yc,Xg-Xc)
-                return
+        return
 
 	def update_coords(Xc,Yc):
 		self.Xc = Xc
@@ -47,10 +48,11 @@ class Attractive:
             delta.x = alpha*Sg*cos(thg)
             delta.y = alpha*Sg*sin(thg)
         return delta
+
 class Repulsive:
-        beta = 0.1
-        do = 0
-        tho = 0
+    beta = 0.1
+    do = 0
+    tho = 0
 
 	def __init__(self,Xo,Yo,Xc,Yc,Ro,So):
 		self.Xo = Xo
@@ -62,11 +64,11 @@ class Repulsive:
 
 	def distance_to_goal(self):
 		do = (sqrt(pow(Xo-Xc),2)+(pow(Yo-Yc),2))
-                return
+        return
 
 	def angle_to_goal(self):
 		tho =  atan2(Yo-Yc,Xo-Xc)
-                return
+        return
 
 	def update_coords(Xc,Yc):
 		self.Xc = Xc
@@ -96,6 +98,7 @@ goal = Point()
 goal.x = -2
 goal.y = 2
 delta = Point()
+
 def a_to_d(a):
     return (a/512)*180 -90
 def steering(data):
@@ -114,7 +117,7 @@ def steering(data):
         temp.y = current_y + min(arr[i])*sin(a_to_d((start+end)/2))
         Fr[i] = Repulsive(temp.x,temp.y,current_x,current_y,0.2,0.3)
         print Fr[i].Xo
-    
+
     for i in range(10):
         delta += Fr[i].check_dist_goal()
     delta += Fa.check_dist_goal()
