@@ -108,13 +108,16 @@ def steering(data):
     total_ranges = 512/10
     start = end = 0
     i = 0
-    j = round(total_ranges,1)
+    j = round(total_ranges,0)
+    arr = [0]*10
+    index = []*10
     for i in range (10):
         start = i*j
-        end = (i+1)*j-1
-        arr[i] = data.ranges[start:end]
-        temp.x = current_x + min(arr[i])*cos(a_to_d((start+end)/2))
-        temp.y = current_y + min(arr[i])*sin(a_to_d((start+end)/2))
+        end = ((i+1)*j)-1
+        arr[i] = min(data.ranges[start:end])
+        index[i] = (data.ranges[start:end]).index(min(data.ranges[start:end]))
+        temp.x = current_x + min(arr[i])*cos(a_to_d((index[i]))
+        temp.y = current_y + min(arr[i])*sin(a_to_d((index[i]))
         Fr[i] = Repulsive(temp.x,temp.y,current_x,current_y,0.2,0.3)
         print Fr[i].Xo
 
