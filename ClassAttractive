@@ -1,4 +1,19 @@
-class Attractive
+#! /usr/bin/env python
+
+import rospy
+from nav_msgs.msg import Odometry
+from tf.transformations import euler_from_quaternion
+from geometry_msgs.msg import Point, Twist
+from math import atan2, pi, pow, sqrt, sin, cos
+from std_msgs.msg import Empty
+from time import time
+from sensor_msgs.msg import LaserScan
+import numpy as np
+
+class Attractive:
+        alpha = 0.1
+        dg = 0
+        thg = 0
 	def __init__(self,Xg,Yg,Xc,Yc,Rg,Sg):
 		self.Xg = Xg
 		self.Yg = Yg
@@ -6,17 +21,136 @@ class Attractive
 		self.Yc = Yc
 		self.Rg = Rg
 		self.Sg = Sg
-	
+
 	def distance_to_goal(self):
-		return (sqrt(pow(Xg-Xc)2)+(pow(Yg-Yc)2))
+		dg = (sqrt(pow(Xg-Xc),2)+(pow(Yg-Yc),2))
+		return
 
 	def angle_to_goal(self):
-		return atan2(Yg-Yc,Xg-Xc)
+		thg =  atan2(Yg-Yc,Xg-Xc)
+                return
 
-	def update_coords(Xc,Yc)
+	def update_coords(Xc,Yc):
 		self.Xc = Xc
 		self.Yc = Yc
 		return
-		
 
-		
+class Repulsive:
+        beta = 0.1
+        do = 0
+        tho = 0
+        
+	def __init__(self,Xo,Yo,Xc,Yc,Ro,So):
+		self.Xo = Xo
+		self.Yo = Yo
+		self.Xc = Xc
+		self.Yc = Yc
+		self.Ro = Ro
+		self.So = So
+
+	def distance_to_goal(self):
+		do = (sqrt(pow(Xo-Xc),2)+(pow(Yo-Yc),2))
+                return
+
+	def angle_to_goal(self):
+		tho =  atan2(Yo-Yc,Xo-Xc)
+                return
+
+	def update_coords(Xc,Yc):
+		self.Xc = Xc
+		self.Yc = Yc
+		return
+
+#Implementation
+
+current_x = 0.0
+current_y = 0.0
+current_th = 0.0
+goal = Point()
+goal.x = -2
+goal.y = 2
+def steering(data):
+		#PUT DATA HERE
+		#nine = data.ranges[]
+		#eight = data.ranges[]
+		#seven = data.ranges[]
+		#six = data.ranges[608:719]
+	five = data.ranges[509:608]
+	four = data.ranges[409:508]
+	three = data.ranges[313:408]
+	two = data.ranges[213:312]
+	one = data.ranges[113:212]
+	zero = data.ranges[0:112]
+	A = Attractive(6,5,current_x,current_y,3,2)
+		#obstacle = Repulsive()
+	print A.Rg
+def Odom(msg):
+	global current_x
+	global current_y
+	global current_th
+	current_x = msg.pose.pose.position.x                                        # Set global variable for x co-ord
+	current_y = msg.pose.pose.position.y                                        # Set global variable for y co-ord
+	roll = pitch = current_th = 0.0
+
+	rot_q = msg.pose.pose.orientation
+	#obtain the angle 'yaw' using a quaternion to euler converter
+	(roll, pitch, current_th) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
+	#convert the angle to degrees
+
+	current_th = current_th*(180/pi)                                            # Set global variable for angle (in degrees)
+
+#set up nodes
+rospy.init_node("speed_controller", anonymous = True)                           # Node
+sub = rospy.Subscriber("/odom", Odometry, Odom)                              # Odometry subscriber
+pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size =1)        # Publisher to move robot
+speed = Twist()
+
+# set up the odometry reset publisher
+reset_odom = rospy.Publisher('/mobile_base/commands/reset_odometry', Empty, queue_size=10)  # Publisher to reset the Odometry
+scan_sub = rospy.Subscriber('/scan', LaserScan, steering)                       # Subscriber to get info from the laser
+
+# reset odometry values (these messages take a few iterations to get through)
+timer = time()
+#the longer the timer set the more accurate the odometry initializes
+while time() - timer < 1.5:                                                     # 1.5 second delay.  This seems to improve odometry accuracy on reset
+	reset_odom.publish(Empty())
+	resetted = True
+	r = rospy.Rate(10)
+
+#Main method
+while not rospy.is_shutdown():
+#obtain the x,y vector to goal
+        inc_x = goal.x - current_x
+    	inc_y = goal.y - current_y
+#use tan to find the angle needed to turn towards the goal
+    	angle_to_goal = atan2(inc_y, inc_x) #tanx = O/A
+	
+#convert angle to degrees
+    	angle_to_goal = angle_to_goal*(180/pi)
+
+#find the difference between the angle of the bot and angle needed to turn
+    	angle = angle_to_goal - current_th
+    	print ("x: %s y: %s th: %s" % (current_x, current_y, current_th))
+
+# 4.5 degree error is a comprimise between speed and accuracy
+    	if angle > 4.5 or angle < -4.5:
+      	    print angle
+            speed.linear.x = 0.0
+            if(angle < -4.5):
+          	  speed.angular.z = -0.15
+            if angle >= 4.5:
+          	  speed.angular.z = 0.15
+    	elif -4.5 <= angle <= 4.5:
+       	    speed.linear.x = 0.3
+            speed.angular.z = 0.0
+
+# check if the bot is within a suitable angle to the goal
+    	if -0.1 <= inc_x <= 0.1 and -0.1 <= inc_y <= 0.1:
+	    speed.linear.x = 0
+	    speed.angular.z = 0
+            print 'I am here!'
+            achieved = True                                                     # Updates the achieved boolean
+
+        pub.publish(speed)
+    	r.sleep()
+rospy.spin()
