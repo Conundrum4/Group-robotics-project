@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 import rospy
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
@@ -35,11 +33,25 @@ class Attractive:
 		self.Yc = Yc
 		return
 
+    def check_dist_goal():
+        delta Point()
+        #goal statement
+        if dg < Rg:
+            delta.x = delta.y = 0
+        #if within search field
+        if Rg <= dg <= Sg + Rg:
+            delta.x = alpha*(dg-Rg)*cos(thg)
+            delta.y = alpha*(dg-Rg)*sin(thg)
+        #if outside search field
+        else:
+            delta.x = alpha*Sg*cos(thg)
+            delta.y = alpha*Sg*sin(thg)
+        return delta
 class Repulsive:
         beta = 0.1
         do = 0
         tho = 0
-        
+
 	def __init__(self,Xo,Yo,Xc,Yc,Ro,So):
 		self.Xo = Xo
 		self.Yo = Yo
@@ -61,6 +73,20 @@ class Repulsive:
 		self.Yc = Yc
 		return
 
+    def check_dist_goal():
+        delta Point()
+        #goal statement
+        if do < Ro:
+            delta.x = delta.y = 0
+        #if within search field
+        if Ro <= do <= So + Ro:
+            delta.x = beta*(do-Ro)*cos(thg)
+            delta.y = beta*(do-Ro)*sin(thg)
+        #if outside search field
+        else:
+            delta.x = beta*So*cos(thg)
+            delta.y = beta*So*sin(thg)
+        return delta
 #Implementation
 
 current_x = 0.0
@@ -69,20 +95,28 @@ current_th = 0.0
 goal = Point()
 goal.x = -2
 goal.y = 2
+delta = Point()
+def a_to_d(range):
+    return (a/511)*180 -90
 def steering(data):
-		#PUT DATA HERE
-		#nine = data.ranges[]
-		#eight = data.ranges[]
-		#seven = data.ranges[]
-		#six = data.ranges[608:719]
-	five = data.ranges[509:608]
-	four = data.ranges[409:508]
-	three = data.ranges[313:408]
-	two = data.ranges[213:312]
-	one = data.ranges[113:212]
-	zero = data.ranges[0:112]
-	A = Attractive(6,5,current_x,current_y,3,2)
-		#obstacle = Repulsive()
+    Fa = Attractive(goal.x,goal.y,current_x,current_y,3,2) #Attractive force
+	#PUT DATA HERE
+    temp = Point()
+	total_ranges = 512/10
+    start = end = 0
+    for i in range (10)
+    j = round(total_ranges,1)
+    start = i*j
+    end = (i+1)*j-1
+    arr[i] = data.ranges[start:end]
+    temp.x = current_x + min(arr[i])*cos(a_to_d((start+end)/2))
+    temp.y = current_y + min(arr[i])*sin(a_to_d((start+end)/2))
+    Fr[i] = Repulsive(temp.x,temp.y,current_x,current_y,0.2,0.3)
+	print Fr[i].Xo
+
+    for i in range(10):
+        delta += Fr[i].check_dist_goal()
+    delta += Fa.check_dist_goal()
 	print A.Rg
 def Odom(msg):
 	global current_x
@@ -120,11 +154,11 @@ while time() - timer < 1.5:                                                     
 #Main method
 while not rospy.is_shutdown():
 #obtain the x,y vector to goal
-        inc_x = goal.x - current_x
-    	inc_y = goal.y - current_y
+        inc_x = delta.x - current_x
+    	inc_y = delta.y - current_y
 #use tan to find the angle needed to turn towards the goal
     	angle_to_goal = atan2(inc_y, inc_x) #tanx = O/A
-	
+
 #convert angle to degrees
     	angle_to_goal = angle_to_goal*(180/pi)
 
