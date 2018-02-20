@@ -9,10 +9,9 @@ from sensor_msgs.msg import LaserScan
 import numpy as np
 
 class Attractive:
-    alpha = 0.1
-    dg = 0
-    thg = 0
-
+        alpha = 0.1
+        dg = 0
+        thg = 0
 	def __init__(self,Xg,Yg,Xc,Yc,Rg,Sg):
 		self.Xg = Xg
 		self.Yg = Yg
@@ -27,32 +26,32 @@ class Attractive:
 
 	def angle_to_goal(self):
 		thg =  atan2(Yg-Yc,Xg-Xc)
-        return
+                return
 
 	def update_coords(Xc,Yc):
 		self.Xc = Xc
 		self.Yc = Yc
 		return
 
-    def check_dist_goal():
-        delta = Point()
+        def check_dist_goal():
+            delta = Point()
         #goal statement
-        if dg < Rg:
-            delta.x = delta.y = 0
+            if dg < Rg:
+                delta.x = delta.y = 0
         #if within search field
-        if Rg <= dg <= Sg + Rg:
-            delta.x = alpha*(dg-Rg)*cos(thg)
-            delta.y = alpha*(dg-Rg)*sin(thg)
+            if Rg <= dg <= Sg + Rg:
+                delta.x = alpha*(dg-Rg)*cos(thg)
+                delta.y = alpha*(dg-Rg)*sin(thg)
         #if outside search field
-        else:
-            delta.x = alpha*Sg*cos(thg)
-            delta.y = alpha*Sg*sin(thg)
-        return delta
+            else:
+                delta.x = alpha*Sg*cos(thg)
+                delta.y = alpha*Sg*sin(thg)
+            return delta
 
 class Repulsive:
-    beta = 0.1
-    do = 0
-    tho = 0
+        beta = 0.1
+        do = 0
+        tho = 0
 
 	def __init__(self,Xo,Yo,Xc,Yc,Ro,So):
 		self.Xo = Xo
@@ -64,31 +63,31 @@ class Repulsive:
 
 	def distance_to_goal(self):
 		do = (sqrt(pow(Xo-Xc),2)+(pow(Yo-Yc),2))
-        return
+                return
 
 	def angle_to_goal(self):
 		tho =  atan2(Yo-Yc,Xo-Xc)
-        return
+                return
 
 	def update_coords(Xc,Yc):
 		self.Xc = Xc
 		self.Yc = Yc
 		return
 
-    def check_dist_goal():
-        delta = Point()
-        #goal statement
-        if do < Ro:
-            delta.x = delta.y = 0
-        #if within search field
-        if Ro <= do <= So + Ro:
-            delta.x = beta*(do-Ro)*cos(thg)
-            delta.y = beta*(do-Ro)*sin(thg)
-        #if outside search field
-        else:
-            delta.x = beta*So*cos(thg)
-            delta.y = beta*So*sin(thg)
-        return delta
+        def check_dist_goal():
+            delta = Point()
+            #goal statement
+            if do < Ro:
+                delta.x = delta.y = 0
+            #if within search field
+            if Ro <= do <= So + Ro:
+                delta.x = beta*(do-Ro)*cos(thg)
+                delta.y = beta*(do-Ro)*sin(thg)
+            #if outside search field
+            else:
+                delta.x = beta*So*cos(thg)
+                delta.y = beta*So*sin(thg)
+            return delta
 #Implementation
 
 current_x = 0.0
@@ -100,31 +99,36 @@ goal.y = 2
 delta = Point()
 
 def a_to_d(a):
-    return (a/512)*180 -90
+    return (a/720)*180 -90
+
 def steering(data):
-    Fa = Attractive(goal.x,goal.y,current_x,current_y,.2,.3) #Attractive force
+    Fa = Attractive(goal.x,goal.y,current_x,current_y,0.3,0.2) #Attractive force
 	#PUT DATA HERE
+    Fr = [None]*10
     temp = Point()
-    total_ranges = 512/10
-    start = end = 0
+    total_ranges = 720/10
+    start = 0
+    end = 0
     i = 0
     j = round(total_ranges,0)
-    arr = [0]*10
+    
+    arr = 0
     index = []*10
-    for i in range (10):
+    for i in range (11):
+    
         start = i*j
         end = ((i+1)*j)-1
-        arr[i] = min(data.ranges[start:end])
-        index[i] = (data.ranges[start:end]).index(min(data.ranges[start:end]))
-        temp.x = current_x + min(arr[i])*cos(a_to_d((index[i]))
-        temp.y = current_y + min(arr[i])*sin(a_to_d((index[i]))
+        arr = (min(data.ranges[int(start):int(end)]))
+        index = (data.ranges[int(start):int(end)]).index(min(data.ranges[int(start):int(end)]))
+        temp.x = current_x + arr*cos(a_to_d((start+end)/2))
+        temp.y = current_y + arr*sin(a_to_d((start+end)/2))
         Fr[i] = Repulsive(temp.x,temp.y,current_x,current_y,0.2,0.3)
         print Fr[i].Xo
 
     for i in range(10):
         delta += Fr[i].check_dist_goal()
     delta += Fa.check_dist_goal()
-	print A.Rg
+    print A.Rg
 def Odom(msg):
 	global current_x
 	global current_y
@@ -142,7 +146,7 @@ def Odom(msg):
 
 #set up nodes
 rospy.init_node("speed_controller", anonymous = True)                           # Node
-sub = rospy.Subscriber('/odom', Odometry, Odom)                              # Odometry subscriber
+sub = rospy.Subscriber("/odom", Odometry, Odom)                              # Odometry subscriber
 pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size =1)        # Publisher to move robot
 speed = Twist()
 
