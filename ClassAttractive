@@ -1,0 +1,22 @@
+class Attractive
+	def __init__(self,Xg,Yg,Xc,Yc,Rg,Sg):
+		self.Xg = Xg
+		self.Yg = Yg
+		self.Xc = Xc
+		self.Yc = Yc
+		self.Rg = Rg
+		self.Sg = Sg
+	
+	def distance_to_goal(self):
+		return (sqrt(pow(Xg-Xc)2)+(pow(Yg-Yc)2))
+
+	def angle_to_goal(self):
+		return atan2(Yg-Yc,Xg-Xc)
+
+	def update_coords(Xc,Yc)
+		self.Xc = Xc
+		self.Yc = Yc
+		return
+		
+
+		
