@@ -74,7 +74,7 @@ class Repulsive:
 		return
 
     def check_dist_goal():
-        delta Point()
+        delta = Point()
         #goal statement
         if do < Ro:
             delta.x = delta.y = 0
@@ -104,8 +104,9 @@ def steering(data):
     temp = Point()
     total_ranges = 512/10
     start = end = 0
-    for i in range (10)
+    i = 0
     j = round(total_ranges,1)
+    for i in range (10):
     start = i*j
     end = (i+1)*j-1
     arr[i] = data.ranges[start:end]
