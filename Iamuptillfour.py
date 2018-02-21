@@ -134,8 +134,8 @@ def steering(data):
         if not (senses[i].size):
             continue
         arr = (min(senses[i]))
-        temp.x = current_x + arr*cos(a_to_d(i+9))
-        temp.y = current_y + arr*sin(a_to_d(i+9))
+        temp.x = current_x + arr*cos(i*18+9)
+        temp.y = current_y + arr*sin(i*18+9)
         Fr[i] = Repulsive(temp.x,temp.y,current_x,current_y,0.4,0.25)
         print Fr[i].check_dist_goal()
     i = 0
