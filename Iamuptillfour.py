@@ -90,7 +90,7 @@ goal.y = 0
 delta = Point()
 delta.x = delta.y = 0
 resetted = False
-
+achieved = True
 def a_to_d(sensordata): #convert the 0:511 range to degrees
     return ((sensordata*180)/511)-90
 def d_to_a(degrees): #convert an angle to the 0:511 range
@@ -101,7 +101,9 @@ def steering(data):
     global current_x
     global current_y
     global resetted
-
+    if(achieved == False):
+	return
+    delta.x = delta.y = 0
     if(resetted == False):
         return
     Fa = Attractive(goal.x,goal.y,current_x,current_y,0.3,0.3) #Attractive force
@@ -146,6 +148,7 @@ def steering(data):
         delta.y = delta.y + Fr[i].check_dist_goal().y
     delta.x = delta.x + Fa.check_dist_goal().x
     delta.y = delta.y + Fa.check_dist_goal().y
+    achieved = False
     print "DELTA: %s" %(delta)
 def Odom(msg):
 	global current_x
@@ -201,14 +204,18 @@ while not rospy.is_shutdown():
       	    print angle
             speed.linear.x = min(vel,0)
             if(angle < -2):
-          	  speed.angular.z = -turn
+          	  speed.angular.z = -0.3
             if angle >= 2:
-          	  speed.angular.z = turn
+          	  speed.angular.z = 0.3
     	elif -2 <= angle <= 2:
-       	    speed.linear.x = min(vel,.5)
+       	    speed.linear.x = min(vel,.4)
             speed.angular.z = 0.0
 
 # check if the bot is within a suitable angle to the goal
+	while abs(int_x)<=0.25 and abs(int_y)<=0.25:
+	        speed.linear.x = 0
+	        speed.angular.z = 0
+		achieved == True
     	while abs(goal.x-current_x)<=0.25 and abs(goal.y-current_y)<=0.25:
 	        speed.linear.x = 0
 	        speed.angular.z = 0
