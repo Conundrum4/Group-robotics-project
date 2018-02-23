@@ -135,14 +135,14 @@ def steering(data):
         arr = (min(senses[i]))                                   # the closest obstacle in this range
         th = (((i*18)+9)-90)*(pi/180)                            # the middle angle of the range
 
-    temp.x = current_x + arr*cos(current_th+th)
-    temp.y = current_y + arr*sin(current_th+th)
-    tho = atan2(current_y-temp.y,current_x-temp.x)
+        temp.x = current_x + arr*cos(current_th+th)
+        temp.y = current_y + arr*sin(current_th+th)
+        tho = atan2(current_y-temp.y,current_x-temp.x)
 
-    if(tho < 0):
-        tho = tho + (0.25*pi) #putting the vector at a tangent to the obstacle
-    else:
-        tho = tho - (0.25*pi)
+        if(tho < 0):
+            tho = tho + (0.25*pi) #putting the vector at a tangent to the obstacle
+        else:
+            tho = tho - (0.25*pi)
         Fr = Repulsive(arr, tho,current_x,current_y,0.5,1.2)
         delta.x = delta.x + Fr.check_dist_goal().x
         delta.y = delta.y + Fr.check_dist_goal().y
