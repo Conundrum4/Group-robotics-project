@@ -8,24 +8,28 @@ from time import time
 from sensor_msgs.msg import LaserScan
 import numpy as np
 
+# A class to calculate the attractive force towards the goal
 class Attractive:
 	def __init__(self,Xg,Yg,Xc,Yc,Rg,Sg):
-		self.Xg = Xg
-		self.Yg = Yg
-		self.Xc = Xc
-		self.Yc = Yc
-		self.Rg = Rg
-		self.Sg = Sg
+		self.Xg = Xg                 # x co-ord of goal
+		self.Yg = Yg                 # y co-ord of goal
+		self.Xc = Xc                 # x co-ord of robot
+		self.Yc = Yc                 # y co-ord of robot
+		self.Rg = Rg                 # radius of the goal
+		self.Sg = Sg                 # radius of the attractive field around the goal
 
+        # calculates the angle to the goal, returns thg
 	def angle_to_goal(self):
 		thg =  atan2(self.Yg-self.Yc,self.Xg-self.Xc)
                 return thg
-
+        
+	# updates the robots current co-ordinates
 	def update_coords(self,Xc,Yc):
 		self.Xc = Xc
 		self.Yc = Yc
 		return
-
+	
+        # calculates the distance to the goal and returns the attractive force, delta
         def check_dist_goal(self):
             delta = Point()
             alpha = 0.4
@@ -44,24 +48,28 @@ class Attractive:
                 delta.y = alpha*self.Sg*sin(thg)
             return delta
 
+# A class to calculate the repulsive forces for each obstacle
 class Repulsive:
 	def __init__(self,Xo,Yo,Xc,Yc,Ro,So):
-		self.Xo = Xo
-		self.Yo = Yo
-		self.Xc = Xc
-		self.Yc = Yc
-		self.Ro = Ro
-		self.So = So
+		self.Xo = Xo                 # x co-ord of the obstacle
+		self.Yo = Yo                 # y co-ord of the obstacle
+		self.Xc = Xc                 # x co-ord of the robot
+		self.Yc = Yc                 # y co-ord of the robot
+		self.Ro = Ro                 # radius of the obstacle (allows for a safety margin)
+		self.So = So                 # radius of the repulsive field around the obstacle
 
+	# calculates the angle to the obstacle and returns tho
 	def angle_to_goal(self):
 		tho =  atan2(self.Yo-self.Yc,self.Xo-self.Xc)
                 return tho
-
+   
+        # updates the robots current co-ordinates
 	def update_coords(self,Xc,Yc):
 		self.Xc = Xc
 		self.Yc = Yc
 		return
 
+	# calculates the distance to the obstacle and returns the repulsive force, delta 
         def check_dist_goal(self):
             delta = Point()
             beta = 0.3
@@ -79,46 +87,55 @@ class Repulsive:
             else:
                 delta.x = delta.y = 0
             return delta
+
+
 #Implementation
 
-current_x = 0.0
-current_y = 0.0
-current_th = 0.0
-goal = Point()
-goal.x = 6
-goal.y = 0
-delta = Point()
-delta.x = delta.y = 0
-resetted = False
-achieved = True
+current_x = 0.0          # x co-ord of the robot (global)
+current_y = 0.0          # y co-ord of the robot (global)
+current_th = 0.0         # orientation of the robot (global)
+goal = Point()           # goal co-ordinates (global)
+goal.x = 6               # x co-ord of the goal (global)
+goal.y = 0               # y co-ord of the goal (global)
+delta = Point()          # vector of the robot (global)
+delta.x = delta.y = 0    # set it to zero 
+resetted = False         # Has the odometry been reset? Boolean (global)
+achieved = True          # Has the robot reached its goal? Boolean (global)
+
 def a_to_d(sensordata): #convert the 0:511 range to degrees
     return ((sensordata*180)/511)-90
+
 def d_to_a(degrees): #convert an angle to the 0:511 range
     return 511*(degrees+90)/180
+
 def steering(data):
     global delta
     global goal
     global current_x
     global current_y
     global resetted
+
     if(achieved == False):
 	return
+
     delta.x = delta.y = 0
     if(resetted == False):
         return
+
     Fa = Attractive(goal.x,goal.y,current_x,current_y,0.3,0.3) #Attractive force
-    laser = np.asarray(data.ranges)
-    laser = np.nan_to_num(laser)
-    laser = np.where(laser == 0, data.range_max + 10, laser) #laser is temp array that converts nan values to maximum range
-    laser = np.where(laser > 30, data.range_max + 10, laser) #nan is where the distance is outwith range
-	#PUT DATA HERE
+    
+    laser = np.asarray(data.ranges) # convert laser ranges to np array
+    laser = np.nan_to_num(laser) # change all nan values to 0
+    laser = np.where(laser == 0, data.range_max + 10, laser) # laser is temp array that converts nan values to maximum range
+    laser = np.where(laser > 30, data.range_max + 10, laser) # nan is where the distance is outwith range
+	
     Fr = [None]*10
     temp = Point()
     total_ranges = 720/10
     k = -90
     i = 0
     j = 72
-    #start =
+
     end = ((i+1)*j)-1
     nine = laser[648:719]
     eight = laser[576:647]
