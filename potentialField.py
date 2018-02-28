@@ -71,8 +71,8 @@ current_x = 0.0                      # current x c0-ord of the robot (global)
 current_y = 0.0                      # current y co-ord of the robot (global)
 current_th = 0.0                     # current orientation of the robot (global)
 goal = Point()                       # goal co-ordinates (global)
-goal.x = 5
-goal.y = -4
+goal.x = 10
+goal.y = 0
 delta = Point()                      # delta (global)
 delta.x = delta.y = 0
 resetted = False                     # Has the odometry been rest? Boolean (global)
@@ -102,16 +102,16 @@ def steering(data):
     senses = [[0]]*10
 
     #FOR GAZEBO
-    nine = data.ranges[648:719]
-    eight = data.ranges[576:647]
-    seven = data.ranges[504:575]
-    six = data.ranges[432:503]
-    five = data.ranges[360:431]
-    four = data.ranges[288:359]
-    three = data.ranges[216:287]
-    two = data.ranges[144:215]
-    one = data.ranges[72:143]
-    zero = data.ranges[0:71]
+    nine = laser[648:719]
+    eight = laser[576:647]
+    seven = laser[504:575]
+    six = laser[432:503]
+    five = laser[360:431]
+    four = laser[288:359]
+    three = laser[216:287]
+    two = laser[144:215]
+    one = laser[72:143]
+    zero = laser[0:71]
 
     #FOR ROBOT
     #zero = laser[460:511]
@@ -140,9 +140,9 @@ def steering(data):
         tho = atan2(current_y-temp.y,current_x-temp.x)
 
         if(tho < 0):
-            tho = tho + (0.25*pi) #putting the vector at a tangent to the obstacle
+            tho = tho + (0.5*pi) #putting the vector at a tangent to the obstacle
         else:
-            tho = tho - (0.25*pi)
+            tho = tho - (0.5*pi)
         Fr = Repulsive(arr, tho,current_x,current_y,0.5,1.2)
         delta.x = delta.x + Fr.check_dist_goal().x
         delta.y = delta.y + Fr.check_dist_goal().y
@@ -189,13 +189,13 @@ timer = time()
 #the longer the timer set the more accurate the odometry initializes
 while time() - timer <1.5:                                                      # 1.5 second delay.  This seems to improve odometry accuracy on reset
     reset_odom.publish(Empty())
-    resetted = True
-    r = rospy.Rate(10)
+resetted = True
+r = rospy.Rate(10)
 
 #Main method
 while not rospy.is_shutdown():
 #obtain the x,y vector to goal
-    vel = sqrt(pow(delta.x,2)+pow(delta.y,2))
+#    vel = sqrt(pow(delta.x,2)+pow(delta.y,2))
 #use tan to find the angle needed to turn towards the goal
     angle_to_goal = atan2(delta.y,delta.x) #tanx = O/A
 
@@ -211,19 +211,19 @@ while not rospy.is_shutdown():
         angle = angle - (2 * pi)
         print ("x: %s y: %s th: %s angle: %s" % (current_x, current_y, current_th, angle))
 # 4.5 degree error is a comprimise between speed and accuracy
-        if angle > 0.1:
-            speed.angular.z = .5
-        elif angle < -0.1:
-            speed.angular.z = -.5
-        elif angle < -1:
-            speed.angular.z = -1.5
-            speed.angular.x = 0
+    if angle > 0.1:
+        speed.angular.z = .5
+    elif angle < -0.1:
+        speed.angular.z = -.5
+    elif angle < -1:
+        speed.angular.z = -1.5
+        speed.linear.x = 0
     elif angle > 1:
         speed.angular.z = 1.5
-        speed.angular.x = 0
+        speed.linear.x = 0
     else:
         speed.angular.z = 0
-        speed.linear.x = 0.5
+        speed.linear.x = 0.3
         if speed.linear.x < 0.1:
             speed.linear.x = 0.4
         if speed.linear.x > 0.3:
