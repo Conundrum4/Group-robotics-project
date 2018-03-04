@@ -22,10 +22,10 @@ class Attractive:
         # calculate the distance to the goal, returns delta
         def check_dist_goal(self):
             delta = Point()
-            alpha = 100                  # a constant for the attractive field
+            alpha = .10                  # a constant for the attractive field
 
             #goal statement
-            dg = sqrt(pow((self.Xg-self.Xc),2)+pow((self.Yg-self.Yc),2))
+            dg = sqrt(pow((self.Xg-self.Xc),2)+pow((self.Yc-self.Yg),2))
             thg = atan2(self.Yg-self.Yc,self.Xg-self.Xc)
             if dg < self.Rg:
                 delta.x = delta.y = 0
@@ -52,18 +52,21 @@ class Repulsive:
         # calculate the distance to an obstacle, returns delta
         def check_dist_goal(self):
             delta = Point()
-            beta = 500                    # a constant for the repulsive field
+            beta = 0.5                    # a constant for the repulsive field
             #goal statement
             if self.do < self.Ro:
-                delta.x = -1*(cos(self.tho))*10000    # repulsion becomes very large if too close to object
-                delta.y = -1*(sin(self.tho))*10000    # repulsion becomes very large if too close to object
+                delta.x = -1*np.sign(cos(self.tho))*10000    # repulsion becomes very large if too close to object
+                delta.y = -1*np.sign(sin(self.tho))*10000    # repulsion becomes very large if too close to object
+		print "almost collision"
             #if within search field
-            if self.Ro <= self.do <= self.So + self.Ro:
-                delta.x = -beta*pow((self.So+self.Ro-self.do),2)*cos(self.tho)
-                delta.y = -beta*pow((self.So+self.Ro-self.do),2)*sin(self.tho)
+            if self.Ro <= self.do <= (self.So + self.Ro):
+		print "in radius"
+                delta.x = -beta*(self.So+self.Ro-self.do)*cos(self.tho)
+                delta.y = -beta*(self.So+self.Ro-self.do)*sin(self.tho)
             #if outside search field
-            if self.do > self.So + self.Ro:
+            if self.do > (self.So + self.Ro):
                 delta.x = delta.y = 0
+		print "outside range"
             return delta
 #Implementation
 
@@ -71,8 +74,8 @@ current_x = 0.0                      # current x c0-ord of the robot (global)
 current_y = 0.0                      # current y co-ord of the robot (global)
 current_th = 0.0                     # current orientation of the robot (global)
 goal = Point()                       # goal co-ordinates (global)
-goal.x = 10
-goal.y = 0
+goal.x = 1.5
+goal.y = 2
 delta = Point()                      # delta (global)
 delta.x = delta.y = 0
 resetted = False                     # Has the odometry been rest? Boolean (global)
@@ -91,58 +94,30 @@ def steering(data):
 
     Fa = Attractive(goal.x,goal.y,current_x,current_y,0.5,20) # Attractive force
     laser = np.asarray(data.ranges)                           # Converts to a np array
+
     laser = np.nan_to_num(laser)                              # changes all nan values to 0
     laser = np.where(laser == 0, data.range_max + 10, laser)  # laser is temp array that converts 0 (nan) values to maximum range
     laser = np.where(laser > 30, data.range_max + 10, laser)  # nan is where the distance is outwith range
-
     # Assignments for the laser
     Fr = [0]*10
     temp = Point()
     i = 0
-    senses = [[0]]*10
-
-    #FOR GAZEBO
-    nine = laser[648:719]
-    eight = laser[576:647]
-    seven = laser[504:575]
-    six = laser[432:503]
-    five = laser[360:431]
-    four = laser[288:359]
-    three = laser[216:287]
-    two = laser[144:215]
-    one = laser[72:143]
-    zero = laser[0:71]
-
-    #FOR ROBOT
-    #zero = laser[460:511]
-    #one = laser[407:459]
-    #two = laser[358:408]
-    #three = laser[307:357]
-    #four = laser[256:306]
-    #five = laser[205:255]
-    #six = laser[154:204]
-    #seven = laser[103:153]
-    #eight = laser[52:102]
-    #nine = laser[0:51]
-
     th = -0.5*pi                                                 # adds 90 degrees to th to make vectors curve around obstacle
-
-    senses = [zero,one,two,three,four,five,six,seven,eight,nine] # an array of the laser assignments
-    index = 0
     delta.x = delta.y = 0
 
     for i in range(10):
-        arr = (min(senses[i]))                                   # the closest obstacle in this range
+        print "%s: %s" %(i,np.mean(laser[i*64:(i+1)*64-1]))  #64 is scans divided by 10.
+        arr = (min(laser[i*64:(i+1)*64-1]))                                   # the closest obstacle in this range
         th = (((i*18)+9)-90)*(pi/180)                            # the middle angle of the range
 
-        temp.x = current_x + arr*cos(current_th+th)
-        temp.y = current_y + arr*sin(current_th+th)
+        temp.x = current_x + arr*cos(th)
+        temp.y = current_y + arr*sin(th)
         tho = atan2(current_y-temp.y,current_x-temp.x)
 
         if(tho < 0):
-            tho = tho + (0.5*pi) #putting the vector at a tangent to the obstacle
+            tho = tho - (0.5*pi) #putting the vector at a tangent to the obstacle
         else:
-            tho = tho - (0.5*pi)
+            tho = tho + (0.5*pi)
         Fr = Repulsive(arr, tho,current_x,current_y,0.5,1.2)
         delta.x = delta.x + Fr.check_dist_goal().x
         delta.y = delta.y + Fr.check_dist_goal().y
@@ -194,8 +169,14 @@ r = rospy.Rate(10)
 
 #Main method
 while not rospy.is_shutdown():
+    if 0.5 >= abs(goal.x-current_x) and 0.5 >= abs(goal.y-current_y):
+        speed.angular.z = 0
+        speed.linear.x = 0
+        pub.publish(speed)
+        r.sleep()
+        rospy.spin()
 #obtain the x,y vector to goal
-#    vel = sqrt(pow(delta.x,2)+pow(delta.y,2))
+    vel = sqrt(pow(delta.x,2)+pow(delta.y,2))
 #use tan to find the angle needed to turn towards the goal
     angle_to_goal = atan2(delta.y,delta.x) #tanx = O/A
 
@@ -203,18 +184,17 @@ while not rospy.is_shutdown():
     angle_to_goal = angle_to_goal
 #find the difference between the angle of the bot and angle needed to turn
     angle =  angle_to_goal - current_th
-
 #angle = (angle)%360
     if angle < (-pi):
         angle = angle + (2 * pi)
     if angle > pi:
         angle = angle - (2 * pi)
-        print ("x: %s y: %s th: %s angle: %s" % (current_x, current_y, current_th, angle))
+    print ("x: %s y: %s th: %s angle: %s" % (current_x, current_y, current_th, angle))
 # 4.5 degree error is a comprimise between speed and accuracy
     if angle > 0.1:
-        speed.angular.z = .5
+        speed.angular.z = .7
     elif angle < -0.1:
-        speed.angular.z = -.5
+        speed.angular.z = -.7
     elif angle < -1:
         speed.angular.z = -1.5
         speed.linear.x = 0
@@ -223,14 +203,7 @@ while not rospy.is_shutdown():
         speed.linear.x = 0
     else:
         speed.angular.z = 0
-        speed.linear.x = 0.3
-        if speed.linear.x < 0.1:
-            speed.linear.x = 0.4
-        if speed.linear.x > 0.3:
-            speed.linear.x = 0.4
-    if 0.25 >= abs(goal.x-current_x) and 0.25 >= abs(goal.y-current_y):
-        speed.angular.z = 0
-        speed.linear.x = 0
+        speed.linear.x = 0.1
 # check if the bot is within a suitable angle to the goal
     pub.publish(speed)
     r.sleep()
