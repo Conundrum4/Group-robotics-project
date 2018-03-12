@@ -103,8 +103,9 @@ def steering(data):
     i = 0
     th = -0.5*pi                                                 # adds 90 degrees to th to make vectors curve around obstacle
     delta.x = delta.y = 0
-    #ranges = 64 #gazebo
-    ranges = 51 #turtlebot
+    ranges = 64 #gazebo
+    #ranges = 51 #turtlebot
+    #ranges = 72 #Shayne gazebo
     for i in range(10):
         #print "%s: %s" %(i,(laser[i*ranges:(i+1)*ranges-1]))  #64 is scans divided by 10.
         arr = (min(laser[i*ranges:(i+1)*ranges-1]))                                   # the closest obstacle in this range
@@ -173,10 +174,14 @@ r = rospy.Rate(10)
 
 #Main method
 while not rospy.is_shutdown():
-    if 0.25 >= abs(goal.x - current_x) and 0.25 >= abs(goal.y - current_y):
+   
+    if 0.25 >= abs(goal.x - current_x) and 0.25 >= abs(goal.y - current_y) and not(goal.x ==goal.y == 0):
         speed.linear.x = 0
         speed.angular.z = 0
-
+        print 'GOAL!!!'
+        r.sleep()
+        rospy.spin()
+        
 #obtain the x,y vector to goal
     vel = sqrt(pow(delta.x,2)+pow(delta.y,2))
     #print "vel: %s" %(vel)
@@ -203,6 +208,9 @@ while not rospy.is_shutdown():
         speed.linear.x = 0.1
         speed.angular.z = turn
     print turn
+
+
+        
 # check if the bot is within a suitable angle to the goal
     pub.publish(speed)
     r.sleep()
