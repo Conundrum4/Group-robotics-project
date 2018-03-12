@@ -1,7 +1,7 @@
 import rospy
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
-from geometry_msgs.msg import Point, Twist
+from geometry_msgs.msg import Point, Twist, PoseStamped
 from math import atan2, pi, pow, sqrt, sin, cos
 from std_msgs.msg import Empty
 from time import time
@@ -22,7 +22,7 @@ class Attractive:
         # calculate the distance to the goal, returns delta
         def check_dist_goal(self):
             delta = Point()
-            alpha = 300                 # a constant for the attractive field
+            alpha = 100                 # a constant for the attractive field
 
             #goal statement
             dg = sqrt(pow((self.Xg-self.Xc),2)+pow((self.Yc-self.Yg),2))
@@ -74,8 +74,7 @@ current_x = 0.0                      # current x c0-ord of the robot (global)
 current_y = 0.0                      # current y co-ord of the robot (global)
 current_th = 0.0                     # current orientation of the robot (global)
 goal = Point()                       # goal co-ordinates (global)
-goal.x = 5
-goal.y = -4
+goal.x = goal.y = 0
 delta = Point()                      # delta (global)
 delta.x = delta.y = 0
 resetted = False                     # Has the odometry been rest? Boolean (global)
@@ -127,7 +126,7 @@ def steering(data):
 
     delta.x = delta.x + Fa.check_dist_goal().x
     delta.y = delta.y + Fa.check_dist_goal().y
-    rospy.loginfo("DELTA: %s" %(delta))
+
 
 # odometry function to retrieve position of robot
 def Odom(msg):
@@ -148,14 +147,18 @@ def Odom(msg):
     (roll, pitch, current_th) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
     #convert the angle to degrees
 
-
-
+def GoalPose(data):
+    global goal
+    goal.x = data.pose.position.x
+    goal.y = data.pose.position.y
+    print "goalx: %s goaly: %s" %(goal.x,goal.y)
 #set up nodes
 rospy.init_node("speed_controller", anonymous = True)                           # Node
 sub = rospy.Subscriber("/odom", Odometry, Odom)                                 # Odometry subscriber
 pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size =1)        # Publisher to move robot
 speed = Twist()
-
+pub_g = rospy.Subscriber('/move_base_simple/goal', PoseStamped, GoalPose)
+#move)
 # set up the odometry reset publisher
 reset_odom = rospy.Publisher('/mobile_base/commands/reset_odometry', Empty, queue_size=10)  # Publisher to reset the Odometry
 scan_sub = rospy.Subscriber('/scan', LaserScan, steering)                       # Subscriber to get info from the laser
@@ -170,16 +173,13 @@ r = rospy.Rate(10)
 
 #Main method
 while not rospy.is_shutdown():
-    if 0.25 >= abs(goal.x-current_x) and 0.25 >= abs(goal.y-current_y):
-        speed.angular.z = 0
+    if 0.25 >= abs(goal.x - current_x) and 0.25 >= abs(goal.y - current_y):
         speed.linear.x = 0
-        pub.publish(speed)
-        r.sleep()
-        rospy.spin()
+        speed.angular.z = 0
 
 #obtain the x,y vector to goal
     vel = sqrt(pow(delta.x,2)+pow(delta.y,2))
-    print "vel: %s" %(vel)
+    #print "vel: %s" %(vel)
 #use tan to find the angle needed to turn towards the goal
     angle_to_goal = atan2(delta.y,delta.x) #tanx = O/A
 
@@ -194,9 +194,15 @@ while not rospy.is_shutdown():
         angle = angle - (2 * pi)
     print ("x: %s y: %s th: %s angle: %s" % (current_x, current_y, current_th, angle))
 # 4.5 degree error is a comprimise between speed and accuracy
-    turn = (angle/(pi))
-    speed.linear.x = vel/5000
-    speed.angular.z = turn
+    turn = 0.5*angle
+    #print "turn %s" %turn
+    if(goal.x == goal.y == 0):
+        speed.linear.x = 0
+        speed.angular.z = 0
+    else:
+        speed.linear.x = 0.1
+        speed.angular.z = turn
+    print turn
 # check if the bot is within a suitable angle to the goal
     pub.publish(speed)
     r.sleep()
