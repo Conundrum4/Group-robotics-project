@@ -8,7 +8,7 @@ from time import time
 from sensor_msgs.msg import LaserScan
 import numpy as np
 from numpy import *
-
+from random import randint
 # A class to calculate the attractive force toward the goal
 class Attractive:
         def __init__(self,Xg,Yg,Xc,Yc,Rg,Sg):
@@ -55,12 +55,12 @@ class Repulsive:
             beta = 500                    # a constant for the repulsive field
             #goal statement
             if self.do < self.Ro:
-                delta.x = -1*np.sign(cos(self.tho))*10000    # repulsion becomes very large if too close to object
-                delta.y = -1*np.sign(sin(self.tho))*10000    # repulsion becomes very large if too close to object
+                delta.x = -1*(cos(self.tho))*10000    # repulsion becomes very large if too close to object
+                delta.y = -1*(sin(self.tho))*10000    # repulsion becomes very large if too close to object
             #if within search field
             if self.Ro <= self.do <= self.So + self.Ro:
-                delta.x = -beta*(pow((self.So+self.Ro-self.do),2))*cos(self.tho)
-                delta.y = -beta*(pow((self.So+self.Ro-self.do),2))*sin(self.tho)
+                delta.x = -beta*((self.So+self.Ro-self.do))*cos(self.tho)
+                delta.y = -beta*((self.So+self.Ro-self.do))*sin(self.tho)
             #if outside search field
             if self.do > self.So + self.Ro:
                 delta.x = delta.y = 0
@@ -76,7 +76,8 @@ goal.y = 0
 delta = Point()                      # delta (global)
 delta.x = delta.y = 0
 resetted = True                     # Has the odometry been rest? Boolean (global)
-dist = 0
+dist = 10
+goaltime = time()
 # The steering function to move the robot
 def steering(data):
     global delta
@@ -98,11 +99,11 @@ def steering(data):
     # Assignments for the laser
     Fr = [0]*10
     temp = Point()
-    dist = 0
+    dist = 10
     i = 0
     th = -0.5*pi                                                 # adds 90 degrees to th to make vectors curve around obstacle
     delta.x = delta.y = 0
-    ranges = 64 #gazebo
+    ranges = (len(laser))/10 #gazebo
     #ranges = 51 #turtlebot
     #ranges = 72 #Shayne gazebo
     for i in range(10):
@@ -114,7 +115,7 @@ def steering(data):
         temp.x = current_x + arr*cos(th+current_th)
         temp.y = current_y + arr*sin(th+current_th)
         tho = atan2(temp.y-current_y,temp.x-current_x)
-        Fr = Repulsive(arr, tho,current_x,current_y,0.75,1.2)
+        Fr = Repulsive(arr, tho,current_x,current_y,0.75,1.5)
         delta.x = delta.x + Fr.check_dist_goal().x
         delta.y = delta.y + Fr.check_dist_goal().y
         #print "arr: %s at %s" %(arr,tho)
@@ -144,11 +145,9 @@ def Odom(msg):
 
 def GoalPose(data):
     global goal
-    while time() - timer <1.5:                                                      # 1.5 second delay.  This seems to improve odometry accuracy on reset
-        reset_odom.publish(Empty())
-    goal.x = data.pose.position.x
-    goal.y = data.pose.position.y
-    print "goalx: %s goaly: %s" %(goal.x,goal.y)
+    goal.x = current_x + data.pose.position.x
+    goal.y = current_y + data.pose.position.y
+    print "_____goalx: %s goaly: %s _____" %(goal.x,goal.y)
 pub_g = rospy.Subscriber('/move_base_simple/goal', PoseStamped, GoalPose)
 
 #set up nodes
@@ -184,13 +183,22 @@ while not rospy.is_shutdown():
         angle = angle + (2 * pi)
     if angle > pi:
         angle = angle - (2 * pi)
-    print ("x: %s y: %s th: %s angle: %s" % (current_x, current_y, current_th, angle))
-# 4.5 degree error is a comprimise between speed and accuracy
-    speed.linear.x = 0.3 - (0.12/dist)
-    speed.angular.z = 0.5*(angle)
-    if 0.25 >= abs(goal.x-current_x) and 0.25 >= abs(goal.y-current_y):
+#0.3 max speed and 5,5 worst case so 30sec timer
+    if (goal.x == goal.y == 0):
         speed.angular.z = 0
         speed.linear.x = 0
+        print ("x: %s y: %s th: %s angle: %s" % (current_x, current_y, current_th, angle))
+    elif (0.5 >= abs(goal.x-current_x) and 0.5 >= abs(goal.y-current_y))  or (time()-goaltime >= 10):
+        speed.angular.z = 0
+        speed.linear.x = 0
+        print ("x: %s y: %s th: %s angle: %s" % (current_x, current_y, current_th, angle))
+        goal.x = randint(0,6)-3 #random goal for mapping
+        goal.y = randint(0,6)-3 #-3 to centre
+        print "_____goalx: %s goaly: %s _____" %(goal.x,goal.y)
+        goaltime = time()
+    else:
+        speed.linear.x = max(0,0.3 - (0.12/dist))
+        speed.angular.z = 0.7*(angle)
 # check if the bot is within a suitable angle to the goal
     pub.publish(speed)
     r.sleep()
