@@ -211,7 +211,7 @@ while not rospy.is_shutdown():
         goaltime = time()
     else:
         #speed.linear.x = max(0, 0.3 - (0.12/dist))         # dynamically control linear velocity using distance to objects
-        speed.linear.x = max(0, 0.3-(angle/2))             # dynamically control linear velocity proportional to turning velocity
+        speed.linear.x = max(0, 0.3-abs(angle/2))             # dynamically control linear velocity proportional to turning velocity
         speed.angular.z = 0.7*(angle)                      # dynamically control angular velocity
 
 # check if the bot is within a suitable angle to the goal
