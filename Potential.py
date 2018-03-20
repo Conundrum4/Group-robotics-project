@@ -55,12 +55,12 @@ class Repulsive:
             beta = 500                    # a constant for the repulsive field
             #goal statement
             if self.do < self.Ro:
-                delta.x = -1*(cos(self.tho))*10000    # repulsion becomes very large if too close to object
-                delta.y = -1*(sin(self.tho))*10000    # repulsion becomes very large if too close to object
+                delta.x = -1*np.sign(cos(self.tho))*10000    # repulsion becomes very large if too close to object
+                delta.y = -1*np.sign(sin(self.tho))*10000    # repulsion becomes very large if too close to object
             #if within search field
             if self.Ro <= self.do <= self.So + self.Ro:
-                delta.x = -beta*((self.So+self.Ro-self.do))*cos(self.tho)
-                delta.y = -beta*((self.So+self.Ro-self.do))*sin(self.tho)
+                delta.x = -beta*(pow(self.So+self.Ro-self.do,2))*cos(self.tho)
+                delta.y = -beta*(pow(self.So+self.Ro-self.do,2))*sin(self.tho)
             #if outside search field
             if self.do > self.So + self.Ro:
                 delta.x = delta.y = 0
@@ -192,14 +192,14 @@ while not rospy.is_shutdown():
         angle = angle + (2 * pi)
     if angle > pi:
         angle = angle - (2 * pi)
-
+    goal_dist = sqrt(pow(goal.x-current_x,2)+pow(goal.y-current_y,2))
 # 0.3 max speed and co-ords (5,5) worst case so 30sec timer (30 sec to reach goal)
     if (goal.x == goal.y == 0):
         speed.angular.z = 0
         speed.linear.x = 0
         print ("x: %s y: %s th: %s angle: %s" % (current_x, current_y, current_th, angle))
 
-    elif (0.5 >= abs(goal.x-current_x) and 0.5 >= abs(goal.y-current_y))  or (time()-goaltime >= 10): # goal conditions
+    elif (0.5 >= abs(goal.x-current_x) and 0.5 >= abs(goal.y-current_y))  or (time()-goaltime >= goal_dist/0.15): # goal conditions
         speed.angular.z = 0
         speed.linear.x = 0
         print ("x: %s y: %s th: %s angle: %s" % (current_x, current_y, current_th, angle))
@@ -211,7 +211,7 @@ while not rospy.is_shutdown():
         goaltime = time()
     else:
         #speed.linear.x = max(0, 0.3 - (0.12/dist))         # dynamically control linear velocity using distance to objects
-        speed.linear.x = max(0, 0.3-abs(angle/2))             # dynamically control linear velocity proportional to turning velocity
+        speed.linear.x = max(0, 0.3-abs(angle/10))             # dynamically control linear velocity proportional to turning velocity
         speed.angular.z = 0.7*(angle)                      # dynamically control angular velocity
 
 # check if the bot is within a suitable angle to the goal
